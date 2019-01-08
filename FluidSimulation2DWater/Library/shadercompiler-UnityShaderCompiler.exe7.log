@@ -1,0 +1,35 @@
+Base path: D:/Program Files/Unity/Unity2018_3b/Editor/Data
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
+  api=4 insize=3897 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
+  api=4 insize=620 outsize=0 ok=0
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'const'
+  api=4 insize=2427 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=676 outsize=985 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2427 outsize=617 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3903 outsize=1933 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler

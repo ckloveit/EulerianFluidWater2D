@@ -1,0 +1,24 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel InitFluid
+#include "csFluidVariables.cginc"
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+RWTexture2D<float> gLevelSet;
+RWTexture2D<float> gVelocityU;
+RWTexture2D<float> gVelocityV;
+
+[numthreads(8,8,1)]
+void InitFluid(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	gVelocityU[id.xy] = 0.0;
+	gVelocityV[id.xy] = 0.0;
+	if (id.x == _xSize - 1)
+		gVelocityU[uint2(id.x + 1, id.y)] = 0.0;
+	if (id.y == _ySize - 1)
+		gVelocityV[uint2(id.x, id.y + 1)] = 0.0;
+
+	gLevelSet[id.xy] = 1e10;
+}

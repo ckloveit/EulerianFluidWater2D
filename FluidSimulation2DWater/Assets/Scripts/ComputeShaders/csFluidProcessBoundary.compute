@@ -1,0 +1,24 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel ProcessBoundary
+
+#include "csFluidVariables.cginc"
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+RWTexture2D<float> gVelocityWriteU;
+RWTexture2D<float> gVelocityWriteV;
+Texture2D<float> gLevelSet;
+Texture2D<uint> gCellMarker;
+
+[numthreads(8, 8, 1)]
+void ProcessBoundary(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	if (gCellMarker[id.xy] == CELL_SOLID)
+	{
+		// TODO:
+
+	}
+	
+}

@@ -1,0 +1,24 @@
+fileFormatVersion: 2
+guid: cc002ab9d8ae51648831fc352a705c80
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - mComputeInitialize: {fileID: 7200000, guid: 127d027c5ce8c124998e4fae6a1a4be4,
+      type: 3}
+  - mComputeFluidEmitter: {fileID: 7200000, guid: 92f93b1e3f6b51e4392769a6fe1501c3,
+      type: 3}
+  - mComputeDivergence: {fileID: 7200000, guid: 8708f28184aeeef499390dffa91b635f,
+      type: 3}
+  - mComputeProjection: {fileID: 7200000, guid: 26f3e6b0f669d6f42949b625bdcb926c,
+      type: 3}
+  - mComputeExtrapolateToAir: {fileID: 7200000, guid: ac8c8d6873e40b34494b69c58b641a85,
+      type: 3}
+  - mComputeAdvect: {fileID: 7200000, guid: 4fa92bd944cd2f4419dde831f30243e1, type: 3}
+  - mComputeAddForces: {fileID: 7200000, guid: ff163970abd1f6f4fbf4e3359e9e1288, type: 3}
+  - debugShowTexMaterial: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

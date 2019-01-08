@@ -1,0 +1,100 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel ComputeJacobiPressure
+#pragma kernel ApplyPressure
+#pragma kernel KeepBoundaryU
+#pragma kernel KeepBoundaryV
+
+#include "csFluidVariables.cginc"
+
+Texture2D<float> gVelocityDivergence;
+RWTexture2D<float> gVelocityU;
+RWTexture2D<float> gVelocityV;
+
+RWTexture2D<float> gPressure;
+
+[numthreads(8, 8, 1)]
+void ComputeJacobiPressure(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	float scale = _timeStep / (_gridSpace * _gridSpace * _density);
+
+	float diag = 0.0, offDiag = 0.0;
+	if (id.x > 0)
+	{
+		diag += scale;
+		offDiag -= scale * gPressure[uint2(id.x - 1, id.y)];
+	}
+	if (id.y > 0)
+	{
+		diag += scale;
+		offDiag -= scale * gPressure[uint2(id.x, id.y - 1)];
+	}
+	if (id.x < _xSize - 1)
+	{
+		diag += scale;
+		offDiag -= scale * gPressure[uint2(id.x + 1, id.y)];
+	}
+	if (id.y < _ySize - 1)
+	{
+		diag += scale;
+		offDiag -= scale * gPressure[uint2(id.x, id.y + 1)];
+	}
+	gPressure[id.xy] = (gVelocityDivergence[id.xy] - offDiag) / diag;
+}
+
+
+[numthreads(8, 8, 1)]
+void ApplyPressure(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	float scale = _timeStep / (_density * _gridSpace);
+	if (id.x == 0)
+	{
+		gVelocityU[id.xy] -= scale * gPressure[id.xy];
+	}
+	else if (id.x == _xSize - 1)
+	{
+		gVelocityU[uint2(id.x + 1, id.y)] += scale * gPressure[id.xy];
+		gVelocityU[id.xy] -= scale * (gPressure[id.xy] - gPressure[uint2(id.x - 1, id.y)]);
+	}
+	else
+	{
+		gVelocityU[id.xy] -= scale * (gPressure[id.xy] - gPressure[uint2(id.x - 1, id.y)]);
+	}
+
+	if (id.y == 0)
+	{
+		gVelocityV[id.xy] -= scale * gPressure[id.xy];
+	}
+	else if (id.y == _ySize - 1)
+	{
+		gVelocityV[uint2(id.x, id.y + 1)] += scale * gPressure[id.xy];
+		gVelocityV[id.xy] -= scale * (gPressure[id.xy] - gPressure[uint2(id.x, id.y - 1)]);
+	}
+	else
+	{
+		gVelocityV[id.xy] -= scale * (gPressure[id.xy] - gPressure[uint2(id.x, id.y - 1)]);
+	}
+}
+
+
+[numthreads(8, 1, 1)]
+void KeepBoundaryU(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _ySize)
+		return;
+
+	gVelocityU[uint2(0, id.x)] = 0.0;
+	gVelocityU[uint2(_xSize, id.x)] = 0.0;
+}
+
+[numthreads(8, 1, 1)]
+void KeepBoundaryV(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize)
+		return;
+	gVelocityV[uint2(id.x, 0)] = 0.0;
+	gVelocityV[uint2(id.x, _ySize)] = 0.0;
+}

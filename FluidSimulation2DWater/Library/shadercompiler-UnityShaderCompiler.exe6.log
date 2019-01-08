@@ -1,0 +1,44 @@
+Base path: D:/Program Files/Unity/Unity2018_3b/Editor/Data
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
+  api=4 insize=259 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
+  api=4 insize=3897 outsize=0 ok=0
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'const'
+  api=4 insize=2427 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'const'
+  api=4 insize=3206 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'const'
+  api=4 insize=3897 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=2427 outsize=2661 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3206 outsize=3565 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidExtrapolateVelocityToAir.compute(32): undeclared identifier 'j'
+  api=4 insize=3897 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=3903 outsize=1121 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler

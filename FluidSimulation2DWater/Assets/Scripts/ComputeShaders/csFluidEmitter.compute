@@ -1,0 +1,33 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SphereEmitter
+#include "csFluidVariables.cginc"
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float> gLevelSet;
+RWTexture2D<float> gVelocityU;
+RWTexture2D<float> gVelocityV;
+
+float sphereEmitterPosX;
+float sphereEmitterPosY;
+float sphereEmitterRadius;
+
+[numthreads(8,8,1)]
+void SphereEmitter(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	float x = (id.x + 0.5) - sphereEmitterPosX;
+	float y = (id.y + 0.5) - sphereEmitterPosY;
+	float oldDist = gLevelSet[id.xy];
+	float newDist = sqrt(x*x + y * y) - sphereEmitterRadius;
+	gLevelSet[id.xy] = min(newDist, oldDist);
+
+	if (newDist < 0.5)
+	{
+		gVelocityU[id.xy] = 0;
+		gVelocityU[uint2(id.x + 1,id.y)] = 0;
+
+		gVelocityV[id.xy] = 0;
+		gVelocityV[uint2(id.x, id.y + 1)] = 0;
+	}
+}

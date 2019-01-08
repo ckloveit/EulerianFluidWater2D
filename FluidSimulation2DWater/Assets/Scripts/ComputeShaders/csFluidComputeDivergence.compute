@@ -1,0 +1,21 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel ComputeDivergence
+
+#include "csFluidVariables.cginc"
+
+RWTexture2D<float> gVelocityDivergence;
+
+Texture2D<float> gVelocityU;
+Texture2D<float> gVelocityV;
+
+[numthreads(8, 8, 1)]
+void ComputeDivergence(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	float scale = 1.0 / _gridSpace;
+
+	gVelocityDivergence[id.xy] = -scale * (
+		(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
+		(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
+}
