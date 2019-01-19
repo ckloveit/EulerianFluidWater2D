@@ -1,44 +1,32 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel UpdateGridMarker
 #pragma kernel UpdateGridValidU
 #pragma kernel UpdateGridValidV
 
 #pragma kernel ExtrapolateU
 #pragma kernel ExtrapolateV
 
-#pragma kernel SolidBoundaryForVelocity
-
 #include "csFluidVariables.cginc"
 
-RWTexture2D<float> gVelocityU;
-RWTexture2D<float> gVelocityV;
+RWTexture2D<float> gVelocityURead;
+RWTexture2D<float> gVelocityUWrite;
+RWTexture2D<float> gVelocityVRead;
+RWTexture2D<float> gVelocityVWrite;
 Texture2D<float> gLevelSet;
 
 // grid marker for extrapolate 
 RWTexture2D<uint> gGridMarker;
-RWTexture2D<uint> gGridValidU;
-RWTexture2D<uint> gGridValidV;
-
-[numthreads(8, 8, 1)]
-void UpdateGridMarker(uint3 id : SV_DispatchThreadID)
-{
-	if (id.x >= _xSize || id.y >= _ySize)
-		return;
-	if (gLevelSet[id.xy] <= 0)
-		gGridMarker[id.xy] = CELL_LIQUID;
-	else
-		gGridMarker[id.xy] = CELL_AIR;
-
-	if (id.x == 0 || id.x == _xSize - 1 || id.y == 0 || id.y == _ySize - 1)
-		gGridMarker[id.xy] = CELL_SOLID;
-}
+RWTexture2D<uint> gGridValidURead;
+RWTexture2D<uint> gGridValidUWrite;
+RWTexture2D<uint> gGridValidVRead;
+RWTexture2D<uint> gGridValidVWrite;
 
 [numthreads(8, 8, 1)]
 void UpdateGridValidU(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _xSize + 1 || id.y >= _ySize)
 		return;
-	gGridValidU[id.xy] = 0;
+	gGridValidURead[id.xy]	= 0;
+	gGridValidUWrite[id.xy] = 0;
 	if (id.x == 0 || id.x == _xSize)
 		return;
 	uint leftMarker = gGridMarker[uint2(id.x - 1, id.y)];
@@ -46,8 +34,17 @@ void UpdateGridValidU(uint3 id : SV_DispatchThreadID)
 	if ((leftMarker == CELL_LIQUID || rightMarker == CELL_LIQUID) &&
 		leftMarker != CELL_SOLID && rightMarker != CELL_SOLID)
 	{
-		gGridValidU[id.xy] = 1;
+		gGridValidURead[id.xy] = 1;
+		gGridValidUWrite[id.xy] = 1;
 	}
+
+	/*uint rightMarker = gGridMarker[id.xy];
+	if (rightMarker == CELL_LIQUID)
+	{
+		gGridValidURead[id.xy] = 1;
+		gGridValidUWrite[id.xy] = 1;
+	}*/
+
 }
 
 [numthreads(8, 8, 1)]
@@ -55,7 +52,8 @@ void UpdateGridValidV(uint3 id : SV_DispatchThreadID)
 {
 	if (id.y >= _xSize || id.y >= _ySize + 1)
 		return;
-	gGridValidV[id.xy] = 0;
+	gGridValidVRead[id.xy] = 0;
+	gGridValidVWrite[id.xy] = 0;
 	if (id.y == 0 || id.y == _ySize)
 		return;
 
@@ -64,8 +62,17 @@ void UpdateGridValidV(uint3 id : SV_DispatchThreadID)
 	if ((downMarker == CELL_LIQUID || upMarker == CELL_LIQUID) &&
 		downMarker != CELL_SOLID && upMarker != CELL_SOLID)
 	{
-		gGridValidV[id.xy] = 1;
+		gGridValidVRead[id.xy] = 1;
+		gGridValidVWrite[id.xy] = 1;
 	}
+
+	/*uint upMarker = gGridMarker[id.xy];
+	if ((upMarker == CELL_LIQUID))
+	{
+		gGridValidVRead[id.xy] = 1;
+		gGridValidVWrite[id.xy] = 1;
+	}*/
+
 }
 
 
@@ -79,18 +86,18 @@ void ExtrapolateU(uint3 id : SV_DispatchThreadID)
 	{
 		float sum = 0;
 		int count = 0;
-		if (gGridValidU[id.xy] == 0)
+		if (gGridValidURead[id.xy] == 0)
 		{
 			// we can average 3*3 neighbor ,for now ,simple use 4
-			if (gGridValidU[uint2(id.x + 1, id.y)] == 1) { sum += gVelocityU[uint2(id.x + 1, id.y)]; count++; }
-			if (gGridValidU[uint2(id.x - 1, id.y)] == 1) { sum += gVelocityU[uint2(id.x - 1, id.y)]; count++; }
-			if (gGridValidU[uint2(id.x, id.y + 1)] == 1) { sum += gVelocityU[uint2(id.x, id.y + 1)]; count++; }
-			if (gGridValidU[uint2(id.x, id.y - 1)] == 1) { sum += gVelocityU[uint2(id.x, id.y - 1)]; count++; }
+			if (gGridValidURead[uint2(id.x + 1, id.y)] == 1) { sum += gVelocityURead[uint2(id.x + 1, id.y)]; count++; }
+			if (gGridValidURead[uint2(id.x - 1, id.y)] == 1) { sum += gVelocityURead[uint2(id.x - 1, id.y)]; count++; }
+			if (gGridValidURead[uint2(id.x, id.y + 1)] == 1) { sum += gVelocityURead[uint2(id.x, id.y + 1)]; count++; }
+			if (gGridValidURead[uint2(id.x, id.y - 1)] == 1) { sum += gVelocityURead[uint2(id.x, id.y - 1)]; count++; }
 
 			if (count > 0)
 			{
-				gVelocityU[id.xy] = sum / count;
-				gGridValidU[id.xy] = 1;
+				gVelocityUWrite[id.xy] = sum / count;
+				gGridValidUWrite[id.xy] = 1;
 			}
 		}
 	}
@@ -104,34 +111,21 @@ void ExtrapolateV(uint3 id : SV_DispatchThreadID)
 	{
 		float sum = 0;
 		int count = 0;
-		if (gGridValidV[id.xy] == 0)
+		if (gGridValidVRead[id.xy] == 0)
 		{
 			// we can average 3*3 neighbor ,for now ,simple use 4
-			if (gGridValidV[uint2(id.x + 1, id.y)] == 1) { sum += gVelocityV[uint2(id.x + 1, id.y)]; count++; }
-			if (gGridValidV[uint2(id.x - 1, id.y)] == 1) { sum += gVelocityV[uint2(id.x - 1, id.y)]; count++; }
-			if (gGridValidV[uint2(id.x, id.y + 1)] == 1) { sum += gVelocityV[uint2(id.x, id.y + 1)]; count++; }
-			if (gGridValidV[uint2(id.x, id.y - 1)] == 1) { sum += gVelocityV[uint2(id.x, id.y - 1)]; count++; }
+			if (gGridValidVRead[uint2(id.x + 1, id.y)] == 1) { sum += gVelocityVRead[uint2(id.x + 1, id.y)]; count++; }
+			if (gGridValidVRead[uint2(id.x - 1, id.y)] == 1) { sum += gVelocityVRead[uint2(id.x - 1, id.y)]; count++; }
+			if (gGridValidVRead[uint2(id.x, id.y + 1)] == 1) { sum += gVelocityVRead[uint2(id.x, id.y + 1)]; count++; }
+			if (gGridValidVRead[uint2(id.x, id.y - 1)] == 1) { sum += gVelocityVRead[uint2(id.x, id.y - 1)]; count++; }
 
 			if (count > 0)
 			{
-				gVelocityV[id.xy] = sum / count;
-				gGridValidV[id.xy] = 1;
+				gVelocityVWrite[id.xy] = sum / count;
+				gGridValidVWrite[id.xy] = 1;
 			}
 		}
 	}
 }
 
 
-[numthreads(8, 8, 1)]
-void SolidBoundaryForVelocity(uint3 id : SV_DispatchThreadID)
-{
-	if (id.x >= _xSize || id.y >= _ySize)
-		return;
-	if (gGridMarker[id.xy] = CELL_SOLID)
-	{
-		gVelocityU[id.xy] = 0;
-		gVelocityU[uint2(id.x + 1, id.y)] = 0;
-		gVelocityV[id.xy] = 0;
-		gVelocityV[uint2(id.x, id.y + 1)] = 0;
-	}
-}

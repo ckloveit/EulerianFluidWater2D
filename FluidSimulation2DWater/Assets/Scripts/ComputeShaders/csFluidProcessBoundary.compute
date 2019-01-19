@@ -1,24 +1,80 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel ProcessBoundary
+#pragma kernel ProcessLevelsetBoundary
+#pragma kernel SolidBoundaryForVelocity
+
+
+#pragma kernel KeepBoundaryU
+#pragma kernel KeepBoundaryV
 
 #include "csFluidVariables.cginc"
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 
-RWTexture2D<float> gVelocityWriteU;
-RWTexture2D<float> gVelocityWriteV;
-Texture2D<float> gLevelSet;
-Texture2D<uint> gCellMarker;
+RWTexture2D<float> gLevelSetRead;
+RWTexture2D<float> gLevelSetWrite;
+Texture2D<uint> gGridMarker;
+
+RWTexture2D<float> gVelocityU;
+RWTexture2D<float> gVelocityV;
 
 [numthreads(8, 8, 1)]
-void ProcessBoundary(uint3 id : SV_DispatchThreadID)
+void ProcessLevelsetBoundary(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _xSize || id.y >= _ySize)
 		return;
-	if (gCellMarker[id.xy] == CELL_SOLID)
+	uint i = id.x;
+	uint j = id.y;
+	gLevelSetWrite[id.xy] = gLevelSetRead[id.xy];
+	if (gGridMarker[id.xy] == CELL_SOLID)
 	{
-		// TODO:
+		float sum = 0;
+		int count = 0;
 
+		bool not_x_0 = (i > 0);
+		bool not_x_1 = (i < _xSize - 1);
+		bool not_y_0 = (j > 0);
+		bool not_y_1 = (j < _ySize - 1);
+		if (not_x_1 && CELL_SOLID != gGridMarker[uint2(i + 1, j)]) { sum += gLevelSetRead[uint2(i + 1, j)];     ++count; }
+		if (not_x_0 && CELL_SOLID != gGridMarker[uint2(i - 1, j)]) { sum += gLevelSetRead[uint2(i - 1, j)];     ++count; }
+		if (not_y_1 && CELL_SOLID != gGridMarker[uint2(i, j + 1)]) { sum += gLevelSetRead[uint2(i, j + 1)];     ++count; }
+		if (not_y_0 && CELL_SOLID != gGridMarker[uint2(i, j - 1)]) { sum += gLevelSetRead[uint2(i, j - 1)];     ++count; }
+		if (count > 0) {
+			gLevelSetWrite[uint2(i, j)] = sum / (float)count;
+		}
 	}
-	
+}
+
+
+[numthreads(8, 8, 1)]
+void SolidBoundaryForVelocity(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	if (gGridMarker[id.xy] == CELL_SOLID)
+	{
+		gVelocityU[id.xy] = 0;
+		gVelocityU[uint2(id.x + 1, id.y)] = 0;
+		gVelocityV[id.xy] = 0;
+		gVelocityV[uint2(id.x, id.y + 1)] = 0;
+	}
+}
+
+
+[numthreads(8, 1, 1)]
+void KeepBoundaryU(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _ySize)
+		return;
+
+	gVelocityU[uint2(0, id.x)] = 0.0;
+	gVelocityU[uint2(_xSize, id.x)] = 0.0;
+}
+
+[numthreads(8, 1, 1)]
+void KeepBoundaryV(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize)
+		return;
+	gVelocityV[uint2(id.x, 0)] = 0.0;
+	gVelocityV[uint2(id.x, _ySize)] = 0.0;
 }

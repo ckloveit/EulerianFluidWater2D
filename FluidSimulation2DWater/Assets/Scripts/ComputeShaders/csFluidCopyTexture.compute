@@ -1,0 +1,40 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CopyVelocityUTex
+#pragma kernel CopyVelocityVTex
+#pragma kernel CopyUintTex
+
+#include "csFluidVariables.cginc"
+
+Texture2D<float> gSourceU;
+RWTexture2D<float> gDestinationU;
+
+Texture2D<float> gSourceV;
+RWTexture2D<float> gDestinationV;
+
+Texture2D<uint> gSourceUint;
+RWTexture2D<uint> gDestinationUint;
+
+
+[numthreads(8, 8, 1)]
+void CopyVelocityUTex(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize + 1 || id.y >= _ySize)
+		return;
+	gDestinationU[id.xy] = gSourceU[id.xy];
+}
+
+[numthreads(8, 8, 1)]
+void CopyVelocityVTex(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize + 1)
+		return;
+	gDestinationV[id.xy] = gSourceV[id.xy];
+}
+
+[numthreads(8, 8, 1)]
+void CopyUintTex(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	gDestinationUint[id.xy] = gSourceUint[id.xy];
+}

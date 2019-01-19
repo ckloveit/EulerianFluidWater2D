@@ -21,6 +21,15 @@ public class FluidSolver2D : MonoBehaviour
     public ComputeShader mComputeAdvect;// advect 
     [HideInInspector]
     public ComputeShader mComputeAddForces; // add forces
+    [HideInInspector]
+    public ComputeShader mComputeRedistanceLevelset;// redistance levelset
+    [HideInInspector]
+    public ComputeShader mComputeKeepBoundary; // keep boundary process
+    [HideInInspector]
+    public ComputeShader mComputeUpdateFluidMarker;// update grid marker
+    [HideInInspector]
+    public ComputeShader mComputeCopyTex; // copy texture
+
 
     /* Fluid quantities */
     private RenderTexture2D[] mVelocityU;
@@ -29,8 +38,8 @@ public class FluidSolver2D : MonoBehaviour
 
     /* Fluid Marker */
     private RenderTexture2D mGridMarker;
-    private RenderTexture2D mGridValidU;
-    private RenderTexture2D mGridValidV;
+    private RenderTexture2D[] mGridValidU;
+    private RenderTexture2D[] mGridValidV;
 
     /* Middle Result  */
     private RenderTexture2D mDivergence;
@@ -48,11 +57,23 @@ public class FluidSolver2D : MonoBehaviour
     private uint mEmitterCounter = 0;
     private uint mCounter = 0;
 
+    /* for fastsweep redistance levelset */
+    private uint mRedistanceCounter = 0;
+    private uint mFsmNumDir = 4;
+    private int[,] mFsmConfig;
+
+    /* for standard redistaning levelset */
+    private int mRedistanceLevelsetCounter = 0;
+
+
+
     /* Show debug */
     public bool enabledDebug = true;
     public Material debugShowTexMaterial;
 
     public int mSimulateFPS = 10;
+
+    public bool mEnabledRedistanceLevelset = true;
 
     private System.DateTime currentTime;
     private float simulateStepSeconds;
@@ -71,23 +92,37 @@ public class FluidSolver2D : MonoBehaviour
         mVelocityU = new RenderTexture2D[2];
         mVelocityV = new RenderTexture2D[2];
 
-        mLevelSet[READ] = new RenderTexture2D(mWidth, mHeight);
-        mLevelSet[WRITE] = new RenderTexture2D(mWidth, mHeight);
-        mVelocityU[READ] = new RenderTexture2D(mWidth + 1, mHeight);
-        mVelocityU[WRITE] = new RenderTexture2D(mWidth + 1, mHeight);
-        mVelocityV[READ] = new RenderTexture2D(mWidth, mHeight + 1);
-        mVelocityV[WRITE] = new RenderTexture2D(mWidth, mHeight + 1);
+        mLevelSet[READ] = new RenderTexture2D(mWidth, mHeight,"levelset0");
+        mLevelSet[WRITE] = new RenderTexture2D(mWidth, mHeight, "levelset0");
+        mVelocityU[READ] = new RenderTexture2D(mWidth + 1, mHeight, "velocityU0");
+        mVelocityU[WRITE] = new RenderTexture2D(mWidth + 1, mHeight, "velocityU1");
+        mVelocityV[READ] = new RenderTexture2D(mWidth, mHeight + 1, "velocityV0");
+        mVelocityV[WRITE] = new RenderTexture2D(mWidth, mHeight + 1, "velocityV1");
 
-        mDivergence = new RenderTexture2D(mWidth, mHeight);
-        mPressure = new RenderTexture2D(mWidth, mHeight);
+        mDivergence = new RenderTexture2D(mWidth, mHeight,"divergence");
+        mPressure = new RenderTexture2D(mWidth, mHeight,"pressure");
 
-        mGridMarker = new RenderTexture2D(mWidth, mHeight,RenderTextureFormat.RInt);
-        mGridValidU = new RenderTexture2D(mWidth + 1, mHeight, RenderTextureFormat.RInt);
-        mGridValidV = new RenderTexture2D(mWidth, mHeight + 1, RenderTextureFormat.RInt);
+        mGridMarker = new RenderTexture2D(mWidth, mHeight,"gridMarker",RenderTextureFormat.RInt);
+        mGridValidU = new RenderTexture2D[2];
+        mGridValidV = new RenderTexture2D[2];
+
+        mGridValidU[READ]   = new RenderTexture2D(mWidth + 1, mHeight, "gridValidU0", RenderTextureFormat.RInt);
+        mGridValidU[WRITE]  = new RenderTexture2D(mWidth + 1, mHeight, "gridValidU1", RenderTextureFormat.RInt);
+        mGridValidV[READ]   = new RenderTexture2D(mWidth, mHeight + 1, "gridValidV0",RenderTextureFormat.RInt);
+        mGridValidV[WRITE]  = new RenderTexture2D(mWidth, mHeight + 1, "gridValidV1", RenderTextureFormat.RInt);
 
         currentTime = System.DateTime.Now;
         simulateStepSeconds = 1.0f / numSimulateFPS;
-        
+
+        // init fast sweep
+        mFsmConfig = new int[4 , 4]
+        {
+            {1,          mWidth,           1,  mHeight },
+            {mWidth - 2,     -1,           1,  mHeight },
+            {1,          mWidth, mHeight - 2,       -1 },
+            {mWidth - 2,    -1,  mHeight - 2,       -1 },
+        };
+
         // init start states
         InitFluidStartStage();
 
@@ -97,7 +132,7 @@ public class FluidSolver2D : MonoBehaviour
     {
         compute.SetInt("_xSize", mWidth);
         compute.SetInt("_ySize", mHeight);
-        compute.SetFloat("_timeStep", simulateStepSeconds);//compute.SetFloat("_timeStep", Time.deltaTime);//
+        compute.SetFloat("_timeStep", Time.deltaTime);//compute.SetFloat("_timeStep", simulateStepSeconds);//
         compute.SetFloat("_gridSpace", mGridSize);
         compute.SetFloat("_density", mDensity);
     }
@@ -110,6 +145,8 @@ public class FluidSolver2D : MonoBehaviour
         mComputeInitialize.SetTexture(initKernel, "gVelocityU", mVelocityU[READ].Source);
         mComputeInitialize.SetTexture(initKernel, "gVelocityV", mVelocityV[READ].Source);
         mComputeInitialize.Dispatch(initKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+
+        UpdateFluidGridMarker();//
     }
 
     // nSteps : every frame 
@@ -130,35 +167,49 @@ public class FluidSolver2D : MonoBehaviour
     }
     private void Update()
     {
-        Simulate();
-        //SimulateStep();
+        //Simulate();
+        SimulateStep();
     }
 
     private void SimulateStep()
     {
         // for emitter
-        if(mEmitterCounter++ % 10 == 0)
+        if(mEmitterCounter++ % 500 == 0)
         {
             mCounter++;
-            if(mCounter < 20)
+            if (mCounter <= 4)
                 EmitterFluid();
         }
         // 1. add forces
         AddExternalForcesGPU();
+        // 2. keep boundary
+        // 2.1 process boundary for levelset
+        KeepBoundaryForLevelset();
+        //// 3. update grid marker
+        UpdateFluidGridMarker();
+        // 4. kepp boundary for velocity
+        KeepBoundaryForVelocity();
 
-        // 2. extrapolate velocity to air with two grid(need to improve)
-        ExtrapolateVelocityToAirGPU();
 
-        // 3. applying project
-        // 3.1 calculate divergence
+        //5.applying project
+        //5.1 calculate divergence
         ComputeDivergence();
-        // 3.2 calculate pressure (use jaccobin , red-black gauss-sibel,multi-grid ),subtract divergence pressure
+        // 5.2 calculate pressure (use jaccobin , red-black gauss-sibel,multi-grid ),subtract divergence pressure
         ComputePressure();
 
-        // 4. advect quantities
+        //// 6. extrapolate velocity to air with two grid(need to improve)
+        ExtrapolateVelocityToAirGPU();
+
+        // 7. keep boundary velocity
+        KeepBoundaryForVelocity();
+
+        // 8. advect quantities
         AdvectGPU();
-        
-        // 5. volume rendering
+
+        KeepBoundaryForVelocity();
+        // 5. redistance levelset
+        RedistanceLevelSet();
+        // 6. volume rendering
 
         Swap();
     }
@@ -169,57 +220,105 @@ public class FluidSolver2D : MonoBehaviour
         mComputeFluidEmitter.SetTexture(SphereEmitterKernel, "gLevelSet", mLevelSet[READ].Source);
         mComputeFluidEmitter.SetTexture(SphereEmitterKernel, "gVelocityU", mVelocityU[READ].Source);
         mComputeFluidEmitter.SetTexture(SphereEmitterKernel, "gVelocityV", mVelocityV[READ].Source);
-        mComputeFluidEmitter.SetFloat("sphereEmitterPosX", (0.1f + 0.8f * Random.value) * mWidth);
-        mComputeFluidEmitter.SetFloat("sphereEmitterPosY", (0.5f + 0.4f * Random.value) * mHeight);
-        mComputeFluidEmitter.SetFloat("sphereEmitterRadius", 0.08f * Mathf.Min(mWidth, mHeight));
+        mComputeFluidEmitter.SetFloat("sphereEmitterPosX", (0.5f /*+ 0.8f * Random.value*/) * mWidth);
+        mComputeFluidEmitter.SetFloat("sphereEmitterPosY", (0.8f /*+ 0.4f * Random.value*/) * mHeight);
+        mComputeFluidEmitter.SetFloat("sphereEmitterRadius", 2 * 0.08f * Mathf.Min(mWidth, mHeight));
         mComputeFluidEmitter.Dispatch(SphereEmitterKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
     }
 
+    private void UpdateFluidGridMarker()
+    {
+        UploadGlobalParameters(mComputeUpdateFluidMarker);
+        // 1. update Grid marker
+        int UpdateGridMarkerKernel = mComputeUpdateFluidMarker.FindKernel("UpdateGridMarker");
+        mComputeUpdateFluidMarker.SetTexture(UpdateGridMarkerKernel, "gLevelSet", mLevelSet[READ].Source);
+        mComputeUpdateFluidMarker.SetTexture(UpdateGridMarkerKernel, "gGridMarker", mGridMarker.Source);
+        mComputeUpdateFluidMarker.Dispatch(UpdateGridMarkerKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+    }
+    private void KeepBoundaryForLevelset()
+    {
+        // 2. process level set boundary
+        UploadGlobalParameters(mComputeKeepBoundary);
+        int ProcessLevelsetBoundaryKernel = mComputeKeepBoundary.FindKernel("ProcessLevelsetBoundary");
+        mComputeKeepBoundary.SetTexture(ProcessLevelsetBoundaryKernel, "gLevelSetRead", mLevelSet[READ].Source);
+        mComputeKeepBoundary.SetTexture(ProcessLevelsetBoundaryKernel, "gLevelSetWrite", mLevelSet[WRITE].Source);
+        mComputeKeepBoundary.SetTexture(ProcessLevelsetBoundaryKernel, "gGridMarker", mGridMarker.Source);
+        mComputeKeepBoundary.Dispatch(ProcessLevelsetBoundaryKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+        Graphics.CopyTexture(mLevelSet[WRITE].Source, mLevelSet[READ].Source);
+    }
+    private void KeepBoundaryForVelocity()
+    {
+        UploadGlobalParameters(mComputeKeepBoundary);
+        int SolidBoundaryForVelocityKernel = mComputeKeepBoundary.FindKernel("SolidBoundaryForVelocity");
+        mComputeKeepBoundary.SetTexture(SolidBoundaryForVelocityKernel, "gGridMarker", mGridMarker.Source);
+        mComputeKeepBoundary.SetTexture(SolidBoundaryForVelocityKernel, "gVelocityU", mVelocityU[READ].Source);
+        mComputeKeepBoundary.SetTexture(SolidBoundaryForVelocityKernel, "gVelocityV", mVelocityV[READ].Source);
+        mComputeKeepBoundary.Dispatch(SolidBoundaryForVelocityKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
+    }
 
     private void ExtrapolateVelocityToAirGPU()
     {
         UploadGlobalParameters(mComputeExtrapolateToAir);
-        // 1. update Grid marker
-        int UpdateGridMarkerKernel = mComputeExtrapolateToAir.FindKernel("UpdateGridMarker");
-        mComputeExtrapolateToAir.SetTexture(UpdateGridMarkerKernel, "gLevelSet", mLevelSet[READ].Source);
-        mComputeExtrapolateToAir.SetTexture(UpdateGridMarkerKernel, "gGridMarker", mGridMarker.Source);
-        mComputeExtrapolateToAir.Dispatch(UpdateGridMarkerKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
-
-        // 2. update Grid Valid U and V
-
+        // 1. set valid flag
         int UpdateGridValidUKernel = mComputeExtrapolateToAir.FindKernel("UpdateGridValidU");
         mComputeExtrapolateToAir.SetTexture(UpdateGridValidUKernel, "gGridMarker", mGridMarker.Source);
-        mComputeExtrapolateToAir.SetTexture(UpdateGridValidUKernel, "gGridValidU", mGridValidU.Source);
+        mComputeExtrapolateToAir.SetTexture(UpdateGridValidUKernel, "gGridValidURead", mGridValidU[READ].Source);
+        mComputeExtrapolateToAir.SetTexture(UpdateGridValidUKernel, "gGridValidUWrite", mGridValidU[WRITE].Source);
         mComputeExtrapolateToAir.Dispatch(UpdateGridValidUKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
         int UpdateGridValidVKernel = mComputeExtrapolateToAir.FindKernel("UpdateGridValidV");
-        mComputeExtrapolateToAir.SetTexture(UpdateGridValidVKernel, "gGridMarker", mLevelSet[READ].Source);
-        mComputeExtrapolateToAir.SetTexture(UpdateGridValidVKernel, "gGridValidV", mGridValidV.Source);
+        mComputeExtrapolateToAir.SetTexture(UpdateGridValidVKernel, "gGridMarker", mGridMarker.Source);
+        mComputeExtrapolateToAir.SetTexture(UpdateGridValidVKernel, "gGridValidVRead", mGridValidV[READ].Source);
+        mComputeExtrapolateToAir.SetTexture(UpdateGridValidVKernel, "gGridValidVWrite", mGridValidV[WRITE].Source);
         mComputeExtrapolateToAir.Dispatch(UpdateGridValidVKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
 
-        // 3. extrapolate velocity to air
-        int numIterates = 15;
-        int ExtrapolateUKernel = mComputeExtrapolateToAir.FindKernel("ExtrapolateU");
-        for (int i = 0; i < numIterates; i++)
-        {
-            mComputeExtrapolateToAir.SetTexture(ExtrapolateUKernel, "gVelocityU", mVelocityU[READ].Source);
-            mComputeExtrapolateToAir.SetTexture(ExtrapolateUKernel, "gGridValidU", mGridValidU.Source);
-            mComputeExtrapolateToAir.Dispatch(ExtrapolateUKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
-        }
-        int ExtrapolateVKernel = mComputeExtrapolateToAir.FindKernel("ExtrapolateV");
-        for (int i = 0; i < numIterates; i++)
-        {
-            mComputeExtrapolateToAir.SetTexture(ExtrapolateVKernel, "gVelocityV", mVelocityV[READ].Source);
-            mComputeExtrapolateToAir.SetTexture(ExtrapolateVKernel, "gGridValidV", mGridValidV.Source);
-            mComputeExtrapolateToAir.Dispatch(ExtrapolateVKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
-        }
+        // 2. extrapolate velocity to air
+        UploadGlobalParameters(mComputeCopyTex);
+        int CopyVelocityUTexKernel = mComputeCopyTex.FindKernel("CopyVelocityUTex");
+        int CopyVelocityVTexKernel = mComputeCopyTex.FindKernel("CopyVelocityVTex");
+        int CopyUintTexKernel = mComputeCopyTex.FindKernel("CopyUintTex");
 
-        // 4. keep solid boundary for velocity
-        int SolidBoundaryForVelocityKernel = mComputeExtrapolateToAir.FindKernel("SolidBoundaryForVelocity");
-        mComputeExtrapolateToAir.SetTexture(SolidBoundaryForVelocityKernel, "gGridMarker", mGridMarker.Source);
-        mComputeExtrapolateToAir.SetTexture(SolidBoundaryForVelocityKernel, "gVelocityU", mVelocityU[READ].Source);
-        mComputeExtrapolateToAir.SetTexture(SolidBoundaryForVelocityKernel, "gVelocityV", mVelocityV[READ].Source);
-        mComputeExtrapolateToAir.Dispatch(SolidBoundaryForVelocityKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+        int numIterates = 10;
+        for (int i = 0; i < numIterates; i++)
+        {
+            //// copy tex
+            //mComputeCopyTex.SetTexture(CopyVelocityUTexKernel,"gSourceU", mVelocityU[READ].Source);
+            //mComputeCopyTex.SetTexture(CopyVelocityUTexKernel, "gDestinationU", mVelocityU[WRITE].Source);
+            //mComputeCopyTex.Dispatch(CopyVelocityUTexKernel,Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+
+            Graphics.CopyTexture(mVelocityU[READ].Source, mVelocityU[WRITE].Source);
+            int ExtrapolateUKernel = mComputeExtrapolateToAir.FindKernel("ExtrapolateU");
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateUKernel, "gVelocityURead", mVelocityU[READ].Source);
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateUKernel, "gVelocityUWrite", mVelocityU[WRITE].Source);
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateUKernel, "gGridValidURead", mGridValidU[READ].Source);
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateUKernel, "gGridValidUWrite", mGridValidU[WRITE].Source);
+            mComputeExtrapolateToAir.Dispatch(ExtrapolateUKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            Graphics.CopyTexture(mGridValidU[WRITE].Source, mGridValidU[READ].Source);
+
+            //mComputeCopyTex.SetTexture(CopyVelocityUTexKernel, "gSourceU", mVelocityU[WRITE].Source);
+            //mComputeCopyTex.SetTexture(CopyVelocityUTexKernel, "gDestinationU", mVelocityU[READ].Source);
+            //mComputeCopyTex.Dispatch(CopyVelocityUTexKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+
+            Graphics.CopyTexture(mVelocityU[WRITE].Source, mVelocityU[READ].Source);
+
+            //mComputeCopyTex.SetTexture(CopyVelocityVTexKernel, "gSourceV", mVelocityV[READ].Source);
+            //mComputeCopyTex.SetTexture(CopyVelocityVTexKernel, "gDestinationV", mVelocityV[WRITE].Source);
+            //mComputeCopyTex.Dispatch(CopyVelocityVTexKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+
+            Graphics.CopyTexture(mVelocityV[READ].Source, mVelocityV[WRITE].Source);
+            int ExtrapolateVKernel = mComputeExtrapolateToAir.FindKernel("ExtrapolateV");
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateVKernel, "gVelocityVRead", mVelocityV[READ].Source);
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateVKernel, "gVelocityVWrite", mVelocityV[WRITE].Source);
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateVKernel, "gGridValidVRead", mGridValidV[READ].Source);
+            mComputeExtrapolateToAir.SetTexture(ExtrapolateVKernel, "gGridValidVWrite", mGridValidV[WRITE].Source);
+            mComputeExtrapolateToAir.Dispatch(ExtrapolateVKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+            Graphics.CopyTexture(mGridValidV[WRITE].Source, mGridValidV[READ].Source);
+            Graphics.CopyTexture(mVelocityV[WRITE].Source, mVelocityV[READ].Source); 
+            //mComputeCopyTex.SetTexture(CopyVelocityVTexKernel, "gSourceV", mVelocityV[WRITE].Source);
+            //mComputeCopyTex.SetTexture(CopyVelocityVTexKernel, "gDestinationV", mVelocityV[READ].Source);
+            //mComputeCopyTex.Dispatch(CopyVelocityVTexKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+
+        }
 
     }
 
@@ -265,6 +364,7 @@ public class FluidSolver2D : MonoBehaviour
         int computeDivergenceKernel = mComputeDivergence.FindKernel("ComputeDivergence");
         mComputeDivergence.SetTexture(computeDivergenceKernel, "gVelocityU", mVelocityU[READ].Source);
         mComputeDivergence.SetTexture(computeDivergenceKernel, "gVelocityV", mVelocityV[READ].Source);
+        mComputeDivergence.SetTexture(computeDivergenceKernel, "gGridMarker", mGridMarker.Source);
         mComputeDivergence.SetTexture(computeDivergenceKernel, "gVelocityDivergence", mDivergence.Source);
         mComputeDivergence.Dispatch(computeDivergenceKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
     }
@@ -274,31 +374,50 @@ public class FluidSolver2D : MonoBehaviour
         UploadGlobalParameters(mComputeProjection);
         int jacobiKernel = mComputeProjection.FindKernel("ComputeJacobiPressure");
         // 1. compute pressure
-        int numLoop = 50;
-        
+        int numLoop = 100;
         for (int i=0;i< numLoop; i++)
         {
             mComputeProjection.SetTexture(jacobiKernel, "gPressure", mPressure.Source);
             mComputeProjection.SetTexture(jacobiKernel, "gVelocityDivergence", mDivergence.Source);
+            mComputeProjection.SetTexture(jacobiKernel, "gGridMarker", mGridMarker.Source);
             mComputeProjection.Dispatch(jacobiKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
         }
         int applyPressureKernel = mComputeProjection.FindKernel("ApplyPressure");
-        // 2. project (subtract divergence of pressure
+        // 2. project (subtract divergence of pressure)
         mComputeProjection.SetTexture(applyPressureKernel, "gPressure", mPressure.Source);
         mComputeProjection.SetTexture(applyPressureKernel, "gVelocityU", mVelocityU[READ].Source);
         mComputeProjection.SetTexture(applyPressureKernel, "gVelocityV", mVelocityV[READ].Source);
         mComputeProjection.Dispatch(applyPressureKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
-        // 3. keep boundary velocity
-        int keepBoundaryU = mComputeProjection.FindKernel("KeepBoundaryU");
-        mComputeProjection.SetTexture(keepBoundaryU, "gVelocityU", mVelocityU[READ].Source);
-        mComputeProjection.Dispatch(keepBoundaryU, Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1, 1);
-
-        int keepBoundaryV = mComputeProjection.FindKernel("KeepBoundaryV");
-        mComputeProjection.SetTexture(keepBoundaryV, "gVelocityV", mVelocityV[READ].Source);
-        mComputeProjection.Dispatch(keepBoundaryV, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), 1, 1);
-
     }
+
+    private void RedistanceLevelSet()
+    {
+        if (mEnabledRedistanceLevelset == false)
+            return;
+        mRedistanceLevelsetCounter++;
+       // if(mRedistanceLevelsetCounter == 1)
+        //if (mRedistanceLevelsetCounter % 9 == 0)
+        {
+            int redistancingLevelsetKernel = mComputeRedistanceLevelset.FindKernel("RedistancingLevelset");
+            UploadGlobalParameters(mComputeRedistanceLevelset);
+            mComputeRedistanceLevelset.SetFloat("_dtau", simulateStepSeconds);
+            int numberOfIterations = 10;
+            int currentRead = WRITE;
+            int currentWrite = READ;
+
+            for(int i = 0;i<numberOfIterations;i++)
+            {
+                mComputeRedistanceLevelset.SetTexture(redistancingLevelsetKernel, "gPhiLevelSetRead", mLevelSet[currentRead].Source);
+                mComputeRedistanceLevelset.SetTexture(redistancingLevelsetKernel, "gPhiLevelSetWrite", mLevelSet[currentWrite].Source);
+                mComputeRedistanceLevelset.Dispatch(redistancingLevelsetKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+                int temp = currentRead;
+                currentRead = currentWrite;
+                currentWrite = temp;
+            }
+        }
+    }
+
 
     private void Swap()
     {
@@ -314,7 +433,11 @@ public class FluidSolver2D : MonoBehaviour
             Graphics.Blit(source, destination);
             return;
         }
-        debugShowTexMaterial.SetTexture("_MainTex", mLevelSet[WRITE].Source);
+        //if(mEnabledRedistanceLevelset)
+            debugShowTexMaterial.SetTexture("_MainTex", mLevelSet[WRITE].Source);
+        //else
+        //    debugShowTexMaterial.SetTexture("_MainTex", mLevelSet[READ].Source);
+        debugShowTexMaterial.SetFloat("_GridSize", 1.0f / mGridSize);
         //debugShowTexMaterial.SetTexture("_MainTex", mVelocityV[READ].Source/*mLevelSet[WRITE].Source*/);
         Graphics.Blit(null, destination, debugShowTexMaterial);
     }

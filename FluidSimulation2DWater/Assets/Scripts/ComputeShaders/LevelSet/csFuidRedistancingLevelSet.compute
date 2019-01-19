@@ -1,0 +1,166 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel RedistancingLevelset
+#include "../csFluidVariables.cginc"
+RWTexture2D<float> gPhiLevelSetRead;
+RWTexture2D<float> gPhiLevelSetWrite;
+
+float sign(float d)
+{
+	return d / sqrt(d * d + _gridSpace * _gridSpace);
+}
+float square(float x)
+{
+	return x * x;
+}
+
+void eno3(float D0[7], float dx, out float dfx[2])
+{
+	float invdx = 1.0 / dx;
+	float hinvdx = invdx / 2;
+	float tinvdx = invdx / 3;
+	float D1[6], D2[5], D3[2];
+	float dQ1, dQ2, dQ3;
+	float c, cstar;
+	int Kstar;
+
+	D1[0] = invdx * (D0[1] - D0[0]);
+	D1[1] = invdx * (D0[2] - D0[1]);
+	D1[2] = invdx * (D0[3] - D0[2]);
+	D1[3] = invdx * (D0[4] - D0[3]);
+	D1[4] = invdx * (D0[5] - D0[4]);
+	D1[5] = invdx * (D0[6] - D0[5]);
+
+	D2[0] = hinvdx * (D1[1] - D1[0]);
+	D2[1] = hinvdx * (D1[2] - D1[1]);
+	D2[2] = hinvdx * (D1[3] - D1[2]);
+	D2[3] = hinvdx * (D1[4] - D1[3]);
+	D2[4] = hinvdx * (D1[5] - D1[4]);
+
+	for (int K = 0; K < 2; ++K) {
+		if (abs(D2[K + 1]) < abs(D2[K + 2])) {
+			c = D2[K + 1];
+			Kstar = K - 1;
+			D3[0] = tinvdx * (D2[K + 1] - D2[K]);
+			D3[1] = tinvdx * (D2[K + 2] - D2[K + 1]);
+		}
+		else {
+			c = D2[K + 2];
+			Kstar = K;
+			D3[0] = tinvdx * (D2[K + 2] - D2[K + 1]);
+			D3[1] = tinvdx * (D2[K + 3] - D2[K + 2]);
+		}
+
+		if (abs(D3[0]) < abs(D3[1])) {
+			cstar = D3[0];
+		}
+		else {
+			cstar = D3[1];
+		}
+
+		dQ1 = D1[K + 2];
+		dQ2 = c * (2 * (1 - K) - 1)*dx;
+		dQ3 = cstar * (3 * square(1 - Kstar) - 6 * (1 - Kstar) + 2)*dx*dx;
+
+		dfx[K] = dQ1 + dQ2 + dQ3;
+	}
+
+}
+
+void upwind1(float D0[3], float dx, out float dfx[2]) {
+	float invdx = 1.0 / dx;
+	dfx[0] = invdx * (D0[1] - D0[0]);
+	dfx[1] = invdx * (D0[2] - D0[1]);
+}
+
+// code from jet: eno_level_set_solver2.cpp 12
+void getDerivatives(uint2 pos, out float dx[2], out float dy[2])
+{
+	uint i = pos.x;
+	uint j = pos.y;
+	float D0[7];
+	uint im3 = 0; uint im2 = 0; uint im1 = 0;
+	if (i >= 3) im3 = i - 3;
+	if (i >= 2) im2 = i - 2;
+	if (i >= 1) im1 = i - 1;
+	uint ip1 = min(i + 1, _xSize - 1);
+	uint ip2 = min(i + 2, _xSize - 1);
+	uint ip3 = min(i + 3, _xSize - 1);
+	
+	uint jm3 = 0; uint jm2 = 0; uint jm1 = 0;
+	if (j >= 3) jm3 = j - 3;
+	if (j >= 2) jm2 = j - 2;
+	if (j >= 1) jm1 = j - 1;
+	uint jp1 = min(j + 1, _ySize - 1);
+	uint jp2 = min(j + 2, _ySize - 1);
+	uint jp3 = min(j + 3, _ySize - 1);
+
+	// 3rd-order ENO differencing
+	D0[0] = gPhiLevelSetRead[uint2(im3, j)];
+	D0[1] = gPhiLevelSetRead[uint2(im2, j)];
+	D0[2] = gPhiLevelSetRead[uint2(im1, j)];
+	D0[3] = gPhiLevelSetRead[uint2(i, j)];
+	D0[4] = gPhiLevelSetRead[uint2(ip1, j)];
+	D0[5] = gPhiLevelSetRead[uint2(ip2, j)];
+	D0[6] = gPhiLevelSetRead[uint2(ip3, j)];
+	eno3(D0, 1.0 / _xSize, dx);
+
+	D0[0] = gPhiLevelSetRead[uint2(i, jm3)];
+	D0[1] = gPhiLevelSetRead[uint2(i, jm2)];
+	D0[2] = gPhiLevelSetRead[uint2(i, jm1)];
+	D0[3] = gPhiLevelSetRead[uint2(i, j)];
+	D0[4] = gPhiLevelSetRead[uint2(i, jp1)];
+	D0[5] = gPhiLevelSetRead[uint2(i, jp2)];
+	D0[6] = gPhiLevelSetRead[uint2(i, jp3)];
+	eno3(D0, 1.0 / _ySize, dy);
+}
+
+void getDerivativesUpwind(uint2 pos, out float dx[2], out float dy[2])
+{
+	uint i = pos.x;
+	uint j = pos.y;
+	float im1 = (i < 1) ? 0 : i - 1;
+	float ip1 = min(i + 1, _xSize - 1);
+	float jm1 = (j < 1) ? 0 : j - 1;
+	float jp1 = min(j + 1, _ySize - 1);
+	float D0[3];
+	D0[0] = gPhiLevelSetRead[uint2(im1, j)];
+	D0[1] = gPhiLevelSetRead[uint2(i, j)];
+	D0[2] = gPhiLevelSetRead[uint2(ip1, j)];
+	upwind1(D0, _xSize, dx);
+
+	D0[0] = gPhiLevelSetRead[uint2(i, jm1)];
+	D0[1] = gPhiLevelSetRead[uint2(i, j)];
+	D0[2] = gPhiLevelSetRead[uint2(i, jp1)];
+	upwind1(D0, _ySize, dy);
+}
+
+float _dtau;
+
+[numthreads(8,8,1)]
+void RedistancingLevelset(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	float d = gPhiLevelSetRead[id.xy];
+	float s = sign(d);
+	float dx[2], dy[2];
+	getDerivativesUpwind(id.xy, dx, dy);
+	/*getDerivatives(id.xy, dx, dy);*/
+
+	////debug
+	//gPhiLevelSetWrite[id.xy] = dx[1];// gPhiLevelSetRead[uint2(i, j)] - gPhiLevelSetRead[uint2(im1, j)];//
+
+	// Explicit Euler step
+	float val = d
+		- max(s, 0.0)
+		* (sqrt(square(max(dx[0], 0.0))
+			+ square(min(dx[1], 0.0))
+			+ square(max(dy[0], 0.0))
+			+ square(min(dy[1], 0.0))) - 1.0)
+		- min(s, 0.0)
+		* (sqrt(square(min(dx[0], 0.0))
+			+ square(max(dx[1], 0.0))
+			+ square(min(dy[0], 0.0))
+			+ square(max(dy[1], 0.0))) - 1.0);
+	gPhiLevelSetWrite[id.xy] = val;
+}

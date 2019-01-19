@@ -14,8 +14,9 @@ void AddGravity(uint3 id : SV_DispatchThreadID)
 	if (id.x >= _xSize || id.y >= _ySize + 1)
 		return;
 
-	if (id.y > 0 && id.y < _ySize - 1) {
-		if (gLevelSet[id.xy] <= 0 && gLevelSet[uint2(id.x, id.y - 1)] <= 0)
+	if (id.y > 0 && id.y < _ySize)
+	{
+		if (gLevelSet[id.xy] <= 0 || gLevelSet[uint2(id.x, id.y - 1)] <= 0)
 		{
 			gVelocityWriteV[id.xy] -= 9.80 * _timeStep;
 		}

@@ -32,7 +32,7 @@
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-
+			float _GridSize;
             v2f vert (appdata v)
             {
                 v2f o;
@@ -56,7 +56,24 @@
 				}
 				else*/
 				{
-					col.rgb = value;
+					/*if (value < 0)
+						col.rgb = 0.5;
+					else*/
+					//if (value == 1)
+					//{
+					//	col.rgb = float3(1, 0, 0);
+					//}
+					//else if (value == 2)
+					//{
+					//	col.rgb = float3(1, 1, 0);
+					//}
+					//else if (value == 0)
+					//{
+					//	col.rgb = float3(0, 1, 0);//(value);////value;//
+
+					//}
+					int shade = int(abs(-value) * 255.0);
+					col.rgb =  (-value / 20);
 				}
 
                 return col;

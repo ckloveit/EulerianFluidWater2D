@@ -4,6 +4,7 @@
 #include "csFluidVariables.cginc"
 
 RWTexture2D<float> gVelocityDivergence;
+Texture2D<uint> gGridMarker;
 
 Texture2D<float> gVelocityU;
 Texture2D<float> gVelocityV;
@@ -14,8 +15,14 @@ void ComputeDivergence(uint3 id : SV_DispatchThreadID)
 	if (id.x >= _xSize || id.y >= _ySize)
 		return;
 	float scale = 1.0 / _gridSpace;
+	if (gGridMarker[id.xy] == CELL_LIQUID)
+	{
+		gVelocityDivergence[id.xy] = -scale * (
+			(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
+			(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
+	}
+	else {
+		gVelocityDivergence[id.xy] = 0;
+	}
 
-	gVelocityDivergence[id.xy] = -scale * (
-		(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
-		(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
 }

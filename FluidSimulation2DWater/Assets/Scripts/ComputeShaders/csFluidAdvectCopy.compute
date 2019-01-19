@@ -1,0 +1,119 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel AdvectLevelset
+#pragma kernel AdvectVelocityU
+#pragma kernel AdvectVelocityV
+
+#include "csFluidVariables.cginc"
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float> gVelocityReadU;
+Texture2D<float> gVelocityReadV;
+Texture2D<float> gLevelSetRead;
+
+RWTexture2D<float> gLevelSetWrite;
+RWTexture2D<float> gVelocityWriteU;
+RWTexture2D<float> gVelocityWriteV;
+
+float LerpU(float x, float y)
+{
+	float2 offset = float2(0, 0.5);
+	x = min(max(x - offset.x, 0), _xSize);
+	y = min(max(y - offset.y, 0), _ySize - 1);
+
+	float2 uv = 0;
+	uv.x = (x + 0.5) / float(_xSize + 1);
+	uv.y = (y + 0.5) / float(_ySize);
+
+	return gVelocityReadU.SampleLevel(g_linear_clamp_sampler, uv, 0).r;
+}
+
+float LerpV(float x,float y)
+{
+	float2 offset = float2(0.5, 0.0);
+	x = min(max(x - offset.x, 0), _xSize - 1);
+	y = min(max(y - offset.y, 0), _ySize);
+
+	float2 uv = 0;
+	uv.x = (x + 0.5) / float(_xSize);
+	uv.y = (y + 0.5) / float(_ySize + 1);
+
+	return gVelocityReadV.SampleLevel(g_linear_clamp_sampler, uv, 0).r;
+}
+
+float2 RungeKutta3(float2 p)
+{
+	float firstU = LerpU(p.x, p.y);
+	float firstV = LerpV(p.x, p.y);
+
+	float midX = p.x - 0.5 * _timeStep *  firstU / _gridSpace;
+	float midY = p.y - 0.5 * _timeStep *  firstV / _gridSpace;
+
+	float midU = LerpU(midX, midY);
+	float midV = LerpV(midX, midY);
+
+	float lastX = p.x - 0.75 * _timeStep * midU / _gridSpace;
+	float lastY = p.y - 0.75 * _timeStep * midV / _gridSpace;
+
+	float lastU = LerpU(lastX, lastY);
+	float lastV = LerpV(lastX, lastY);
+
+	float2 resultPos = p;
+	resultPos.x -= _timeStep * ((2.0 / 9.0) * firstU + (3.0 / 9.0) * midU + (4.0 / 9.0) * lastU) / _gridSpace;
+	resultPos.y -= _timeStep * ((2.0 / 9.0) * firstV + (3.0 / 9.0) * midV + (4.0 / 9.0) * lastV) / _gridSpace;
+	return resultPos;
+}
+
+
+
+[numthreads(8,8,1)]
+void AdvectLevelset(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+
+	float2 pos = float2(id.x + 0.5, id.y + 0.5);
+
+	float2 destPos = RungeKutta3(pos);
+
+	float2 uv = 0;
+	uv.x = saturate(destPos.x / _xSize);
+	uv.y = saturate(destPos.y / _ySize);
+
+	gLevelSetWrite[id.xy] = gLevelSetRead.SampleLevel(g_linear_clamp_sampler, uv, 0).r;
+
+}
+
+
+[numthreads(8, 8, 1)]
+void AdvectVelocityU(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize + 1 || id.y >= _ySize)
+		return;
+
+	float2 pos = float2(id.x, id.y + 0.5);
+
+	float2 destPos = RungeKutta3(pos);
+
+	float2 uv = 0;
+	uv.x = saturate((destPos.x + 0.5) / float(_xSize + 1));
+	uv.y = saturate(destPos.y / float(_ySize));
+
+	gVelocityWriteU[id.xy] = gVelocityReadU.SampleLevel(g_linear_clamp_sampler, uv, 0).r;
+}
+
+[numthreads(8, 8, 1)]
+void AdvectVelocityV(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize + 1)
+		return;
+
+	float2 pos = float2(id.x + 0.5, id.y);
+
+	float2 destPos = RungeKutta3(pos);
+
+	float2 uv = 0;
+	uv.x = saturate(destPos.x / _xSize);
+	uv.y = saturate((destPos.y + 0.5) / float(_ySize + 1));
+
+	gVelocityWriteV[id.xy] = gVelocityReadV.SampleLevel(g_linear_clamp_sampler, uv, 0).r;
+}

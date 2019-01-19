@@ -1,0 +1,23 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel UpdateGridMarker
+
+#include "csFluidVariables.cginc"
+
+Texture2D<float> gLevelSet;
+
+// grid marker for extrapolate 
+RWTexture2D<uint> gGridMarker;
+
+[numthreads(8, 8, 1)]
+void UpdateGridMarker(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	if (gLevelSet[id.xy] <= 0)
+		gGridMarker[id.xy] = CELL_LIQUID;
+	else
+		gGridMarker[id.xy] = CELL_AIR;
+
+	if (id.x == 0 || id.x == _xSize - 1 || id.y == 0 || id.y == _ySize - 1)
+		gGridMarker[id.xy] = CELL_SOLID;
+}

@@ -1,0 +1,107 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel ResetLargestAirDistance
+#pragma kernel RedistanceAir
+#pragma kernel ResetLargestLiquidDistance
+#pragma kernel RedistanceLiquid
+#include "../csFluidVariables.cginc"
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float> gLevelSet;
+RWTexture2D<uint> gGridMarker;
+
+
+/* fast sweep */
+void swap(inout float a, inout float b)
+{
+	float temp = a;
+	a = b;
+	b = temp;
+}
+void sort(float p, float q, out float a, out float b)
+{
+	a = p;
+	b = q;
+	if (a > b) swap(a, b);
+}
+void solveDistanceAir(float p, float q, out float o)
+{
+	float a, b;
+	sort(p, q, a, b);
+	// scan from a tp c, small to large
+	float d = a + 1; // solution to (x - a)^2 
+	if (d > b)
+	{
+		d = (a + b + sqrt(2 - (a - b) * (a - b))) / 2;// solution to (x-a)^2 + (x-b)^2 = 1, x > a, x > b, x < c
+	}
+	if (d < o) o = d;
+}
+void solveDistanceLiquid(float p, float q, out float o)
+{
+	float a, b;
+	sort(p, q, a, b);
+	// scan from b to a, large to small
+	float d = b - 1; // solution to (x-b)^2 = 1, x < b, x > a
+	if (d < a)
+	{
+		d = (a + b - sqrt(2 - (b - a) * (b - a))) / 2;// solution to (x-a)^2 + (x-b)^2 = 1, x > a, x > b, x < c
+	}
+	if (d > o) o = d;
+}
+
+[numthreads(8, 8, 1)]
+void ResetLargestAirDistance(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	if (gGridMarker[id.xy] == CELL_AIR)
+		gLevelSet[id.xy] = 1e6;
+}
+
+int _xStep;
+int _yStep;
+int _xStart;
+int _yStart;
+
+int _xThreadSize;
+int _yThreadSize;
+
+[numthreads(8,8,1)]
+void RedistanceAir(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xThreadSize || id.y >= _yThreadSize)
+		return;
+	if (gGridMarker[id.xy] == CELL_AIR)
+	{
+		float outDist = gLevelSet[uint2(id.x + _xStart,id.y + _yStart)];
+		float a = gLevelSet[uint2(id.x + _xStart - _xStep, id.y + _yStart)];
+		float b = gLevelSet[uint2(id.x + _xStart, id.y + _yStart - _yStep)];
+		solveDistanceAir(a,b, outDist);
+		gLevelSet[uint2(id.x + _xStart, id.y + _yStart)] = outDist;
+	}
+}
+
+
+// for water
+[numthreads(8, 8, 1)]
+void ResetLargestLiquidDistance(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xSize || id.y >= _ySize)
+		return;
+	if (gGridMarker[id.xy] == CELL_LIQUID)
+		gLevelSet[id.xy] = -1e6;
+}
+
+[numthreads(8, 8, 1)]
+void RedistanceLiquid(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _xThreadSize || id.y >= _yThreadSize)
+		return;
+	if (gGridMarker[id.xy] == CELL_LIQUID)
+	{
+		float outDist = gLevelSet[uint2(id.x + _xStart, id.y + _yStart)];
+		float a = gLevelSet[uint2(id.x + _xStart - _xStep, id.y + _yStart)];
+		float b = gLevelSet[uint2(id.x + _xStart, id.y + _yStart - _yStep)];
+		solveDistanceLiquid(a, b, outDist);
+		gLevelSet[uint2(id.x + _xStart, id.y + _yStart)] = outDist;
+	}
+}
