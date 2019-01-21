@@ -126,12 +126,12 @@ void getDerivativesUpwind(uint2 pos, out float dx[2], out float dy[2])
 	D0[0] = gPhiLevelSetRead[uint2(im1, j)];
 	D0[1] = gPhiLevelSetRead[uint2(i, j)];
 	D0[2] = gPhiLevelSetRead[uint2(ip1, j)];
-	upwind1(D0, _xSize, dx);
+	upwind1(D0, 1.0, dx);
 
 	D0[0] = gPhiLevelSetRead[uint2(i, jm1)];
 	D0[1] = gPhiLevelSetRead[uint2(i, j)];
 	D0[2] = gPhiLevelSetRead[uint2(i, jp1)];
-	upwind1(D0, _ySize, dy);
+	upwind1(D0, 1.0, dy);
 }
 
 float _dtau;
@@ -147,17 +147,14 @@ void RedistancingLevelset(uint3 id : SV_DispatchThreadID)
 	getDerivativesUpwind(id.xy, dx, dy);
 	/*getDerivatives(id.xy, dx, dy);*/
 
-	////debug
-	//gPhiLevelSetWrite[id.xy] = dx[1];// gPhiLevelSetRead[uint2(i, j)] - gPhiLevelSetRead[uint2(im1, j)];//
-
 	// Explicit Euler step
 	float val = d
-		- max(s, 0.0)
+		- _dtau * max(s, 0.0)
 		* (sqrt(square(max(dx[0], 0.0))
 			+ square(min(dx[1], 0.0))
 			+ square(max(dy[0], 0.0))
 			+ square(min(dy[1], 0.0))) - 1.0)
-		- min(s, 0.0)
+		- _dtau * min(s, 0.0)
 		* (sqrt(square(min(dx[0], 0.0))
 			+ square(max(dx[1], 0.0))
 			+ square(min(dy[0], 0.0))

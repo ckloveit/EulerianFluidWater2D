@@ -93,7 +93,7 @@ public class FluidSolver2D : MonoBehaviour
     {
         mWidth = _width;
         mHeight = _height;
-        mGridSize = 1.0f / Mathf.Min(mWidth, mHeight);
+        mGridSize = 1.0f;//1.0f / Mathf.Min(mWidth, mHeight);
         mLevelSet = new RenderTexture2D[2];
         mVelocityU = new RenderTexture2D[2];
         mVelocityV = new RenderTexture2D[2];
@@ -343,6 +343,7 @@ public class FluidSolver2D : MonoBehaviour
         int advectLevelsetKernel = mComputeAdvect.FindKernel("AdvectLevelset");
         int advectVelocityUKernel = mComputeAdvect.FindKernel("AdvectVelocityU");
         int advectVelocityVKernel = mComputeAdvect.FindKernel("AdvectVelocityV");
+        mComputeAdvect.SetFloat("_velocitySpeedup", mWidth);
 
         // 1. first advect levelset
         mComputeAdvect.SetTexture(advectLevelsetKernel, "gLevelSetRead", mLevelSet[READ].Source);
@@ -507,7 +508,7 @@ public class FluidSolver2D : MonoBehaviour
         {
             int redistancingLevelsetKernel = mComputeRedistanceLevelset.FindKernel("RedistancingLevelset");
             UploadGlobalParameters(mComputeRedistanceLevelset);
-            mComputeRedistanceLevelset.SetFloat("_dtau", simulateStepSeconds);
+            mComputeRedistanceLevelset.SetFloat("_dtau", 9 * simulateStepSeconds);
             int numberOfIterations = 10;
             int currentRead = WRITE;
             int currentWrite = READ;
@@ -516,7 +517,7 @@ public class FluidSolver2D : MonoBehaviour
             {
                 mComputeRedistanceLevelset.SetTexture(redistancingLevelsetKernel, "gPhiLevelSetRead", mLevelSet[currentRead].Source);
                 mComputeRedistanceLevelset.SetTexture(redistancingLevelsetKernel, "gPhiLevelSetWrite", mLevelSet[currentWrite].Source);
-                mComputeRedistanceLevelset.Dispatch(redistancingLevelsetKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+                mComputeRedistanceLevelset.Dispatch(redistancingLevelsetKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
                 int temp = currentRead;
                 currentRead = currentWrite;
                 currentWrite = temp;

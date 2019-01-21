@@ -1,20 +1,36 @@
-Base path: D:/Program Files/Unity/Unity2018_3b/Editor/Data
+Base path: D:/Program Files/Unity/Unity2018_2_8f1/Unity/Editor/Data
 Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
-  api=4 insize=2427 outsize=0 ok=0
-Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
-  api=4 insize=3206 outsize=0 ok=0
-Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
-  api=4 insize=940 outsize=0 ok=0
-Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
-  api=4 insize=3897 outsize=0 ok=0
+  api=4 insize=3206 outsize=3565 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=3903 outsize=905 ok=1
+  error: 1 plat 4 at csFluidProjectVelocity.compute(39): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(44): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(51): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(56): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(63): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(68): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(75): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(80): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidProjectVelocity.compute(278): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=7801 outsize=2385 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8712 outsize=2501 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  api=4 insize=2724 outsize=2937 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler

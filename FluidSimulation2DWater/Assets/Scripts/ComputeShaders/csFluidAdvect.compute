@@ -14,6 +14,8 @@ RWTexture2D<float> gLevelSetWrite;
 RWTexture2D<float> gVelocityWriteU;
 RWTexture2D<float> gVelocityWriteV;
 
+float _velocitySpeedup;
+
 float LerpU(float x, float y)
 {
 	float2 offset = float2(0, 0.5);
@@ -42,24 +44,24 @@ float LerpV(float x,float y)
 
 float2 RungeKutta3(float2 p)
 {
-	float firstU = LerpU(p.x, p.y);
-	float firstV = LerpV(p.x, p.y);
+	float firstU = LerpU(p.x, p.y)* _velocitySpeedup;
+	float firstV = LerpV(p.x, p.y)* _velocitySpeedup;
 
-	float midX = p.x - 0.5 * _timeStep *  firstU / _gridSpace;
-	float midY = p.y - 0.5 * _timeStep *  firstV / _gridSpace;
+	float midX = p.x - 0.5 * _timeStep *  firstU ;
+	float midY = p.y - 0.5 * _timeStep *  firstV ;
 
-	float midU = LerpU(midX, midY);
-	float midV = LerpV(midX, midY);
+	float midU = LerpU(midX, midY) * _velocitySpeedup;
+	float midV = LerpV(midX, midY) * _velocitySpeedup;
 
-	float lastX = p.x - 0.75 * _timeStep * midU / _gridSpace;
-	float lastY = p.y - 0.75 * _timeStep * midV / _gridSpace;
+	float lastX = p.x - 0.75 * _timeStep * midU ;
+	float lastY = p.y - 0.75 * _timeStep * midV ;
 
-	float lastU = LerpU(lastX, lastY);
-	float lastV = LerpV(lastX, lastY);
+	float lastU = LerpU(lastX, lastY) * _velocitySpeedup;
+	float lastV = LerpV(lastX, lastY) * _velocitySpeedup;
 
 	float2 resultPos = p;
-	resultPos.x -= _timeStep * ((2.0 / 9.0) * firstU + (3.0 / 9.0) * midU + (4.0 / 9.0) * lastU) / _gridSpace;
-	resultPos.y -= _timeStep * ((2.0 / 9.0) * firstV + (3.0 / 9.0) * midV + (4.0 / 9.0) * lastV) / _gridSpace;
+	resultPos.x -= _timeStep * ((2.0 / 9.0) * firstU + (3.0 / 9.0) * midU + (4.0 / 9.0) * lastU);
+	resultPos.y -= _timeStep * ((2.0 / 9.0) * firstV + (3.0 / 9.0) * midV + (4.0 / 9.0) * lastV);
 	return resultPos;
 }
 
@@ -78,14 +80,14 @@ void AdvectLevelset(uint3 id : SV_DispatchThreadID)
 	float u = (gVelocityReadU[id.xy] + gVelocityReadU[uint2(id.x + 1, id.y)]) * 0.5f;
 	float v = (gVelocityReadV[id.xy] + gVelocityReadV[uint2(id.x, id.y + 1)]) * 0.5f;
 
-	float x = pos.x - 0.5 * _timeStep * u / _gridSpace;
-	float y = pos.y - 0.5 * _timeStep * v / _gridSpace;
+	float x = pos.x - 0.5 * _timeStep * u * _velocitySpeedup;
+	float y = pos.y - 0.5 * _timeStep * v * _velocitySpeedup;
 
 	u = LerpU(x, y);
 	v = LerpV(x, y);
 
-	x = pos.x - _timeStep * u / _gridSpace;
-	y = pos.y - _timeStep * v / _gridSpace;
+	x = pos.x - _timeStep * u * _velocitySpeedup;
+	y = pos.y - _timeStep * v * _velocitySpeedup;
 
 	float2 uv = 0;
 	uv.x = saturate((x) / _xSize);
@@ -130,14 +132,14 @@ void AdvectVelocityU(uint3 id : SV_DispatchThreadID)
 	float u = gVelocityReadU[id.xy];
 	float v = (gVelocityReadV[id.xy] + gVelocityReadV[uint2(id.x, id.y + 1)] + gVelocityReadV[uint2(id.x - 1, id.y)] + gVelocityReadV[uint2(id.x - 1, id.y + 1)]) * 0.25;
 
-	float x = pos.x - 0.5 * _timeStep * u / _gridSpace;
-	float y = pos.y - 0.5 * _timeStep * v / _gridSpace;
+	float x = pos.x - 0.5 * _timeStep * u * _velocitySpeedup;
+	float y = pos.y - 0.5 * _timeStep * v * _velocitySpeedup;
 
 	u = LerpU(x, y);
 	v = LerpV(x, y);
 
-	x = pos.x - _timeStep * u / _gridSpace;
-	y = pos.y - _timeStep * v / _gridSpace;
+	x = pos.x - _timeStep * u * _velocitySpeedup;
+	y = pos.y - _timeStep * v * _velocitySpeedup;
 
 	float2 uv = 0;
 	uv.x = saturate((x + 0.5) / float(_xSize + 1));
@@ -157,14 +159,14 @@ void AdvectVelocityV(uint3 id : SV_DispatchThreadID)
 	float u = (gVelocityReadU[id.xy] + gVelocityReadU[uint2(id.x, id.y + 1)] + gVelocityReadU[uint2(id.x - 1, id.y)] + gVelocityReadU[uint2(id.x - 1, id.y + 1)]) * 0.25;
 	float v = gVelocityReadV[id.xy];
 
-	float x = pos.x - 0.5 * _timeStep * u / _gridSpace;
-	float y = pos.y - 0.5 * _timeStep * v / _gridSpace;
+	float x = pos.x - 0.5 * _timeStep * u * _velocitySpeedup;
+	float y = pos.y - 0.5 * _timeStep * v * _velocitySpeedup;
 
 	u = LerpU(x, y);
 	v = LerpV(x, y);
 
-	x = pos.x - _timeStep * u / _gridSpace;
-	y = pos.y - _timeStep * v / _gridSpace;
+	x = pos.x - _timeStep * u * _velocitySpeedup;
+	y = pos.y - _timeStep * v * _velocitySpeedup;
 
 	float2 uv = 0;
 	uv.x = saturate((x ) / _xSize);

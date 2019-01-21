@@ -1,21 +1,31 @@
-Base path: D:/Program Files/Unity/Unity2018_3b/Editor/Data
+Base path: D:/Program Files/Unity/Unity2018_2_8f1/Unity/Editor/Data
 Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
-  api=4 insize=3897 outsize=0 ok=0
+  api=4 insize=3843 outsize=1205 ok=1
 Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'static'
-  api=4 insize=620 outsize=0 ok=0
+  error: 1 plat 4 at csFluidFsmLevelset.compute(71): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidFsmLevelset.compute(97): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=2848 outsize=641 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  error: 2 plat 4 at csFluidVariables.cginc(15): syntax error: unexpected token 'const'
-  api=4 insize=2427 outsize=0 ok=0
+  api=4 insize=4858 outsize=2837 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=676 outsize=985 ok=1
+  api=4 insize=605 outsize=1069 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=2427 outsize=617 ok=1
-Cmd: compileComputeKernel
-  api=4 insize=3903 outsize=1933 ok=1
+  api=4 insize=4359 outsize=2057 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
