@@ -234,7 +234,7 @@ MonoBehaviour:
   enabledDebug: 1
   debugShowTexMaterial: {fileID: 2100000, guid: f6a6cc3d0bac80f48afa50e10b3d0ce4,
     type: 2}
-  mSimulateFPS: 200
+  mSimulateFPS: 100
   mEnabledRedistanceLevelset: 0
 --- !u!81 &732921968
 AudioListener:

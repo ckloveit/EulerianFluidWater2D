@@ -88,11 +88,27 @@ void ExtrapolateU(uint3 id : SV_DispatchThreadID)
 		int count = 0;
 		if (gGridValidURead[id.xy] == 0)
 		{
-			// we can average 3*3 neighbor ,for now ,simple use 4
-			if (gGridValidURead[uint2(id.x + 1, id.y)] == 1) { sum += gVelocityURead[uint2(id.x + 1, id.y)]; count++; }
-			if (gGridValidURead[uint2(id.x - 1, id.y)] == 1) { sum += gVelocityURead[uint2(id.x - 1, id.y)]; count++; }
-			if (gGridValidURead[uint2(id.x, id.y + 1)] == 1) { sum += gVelocityURead[uint2(id.x, id.y + 1)]; count++; }
-			if (gGridValidURead[uint2(id.x, id.y - 1)] == 1) { sum += gVelocityURead[uint2(id.x, id.y - 1)]; count++; }
+			uint2 p0p1 = uint2(id.x, id.y + 1);
+			uint2 p0m1 = uint2(id.x, id.y - 1);
+			uint2 p1p0 = uint2(id.x + 1, id.y);
+			uint2 p1m1 = uint2(id.x + 1, id.y - 1);
+			uint2 p1p1 = uint2(id.x + 1, id.y + 1);
+			uint2 m1p0 = uint2(id.x - 1, id.y);
+			uint2 m1m1 = uint2(id.x - 1, id.y - 1);
+			uint2 m1p1 = uint2(id.x - 1, id.y + 1);
+
+			// we can average 3*3 neighbor
+
+			if (gGridValidURead[p0p1] == 1) { sum += gVelocityURead[p0p1]; count++; }
+			if (gGridValidURead[p0m1] == 1) { sum += gVelocityURead[p0m1]; count++; }
+
+			if (gGridValidURead[p1p0] == 1) { sum += gVelocityURead[p1p0]; count++; }
+			if (gGridValidURead[p1m1] == 1) { sum += gVelocityURead[p1m1]; count++; }
+			if (gGridValidURead[p1p1] == 1) { sum += gVelocityURead[p1p1]; count++; }
+
+			if (gGridValidURead[m1p0] == 1) { sum += gVelocityURead[m1p0]; count++; }
+			if (gGridValidURead[m1m1] == 1) { sum += gVelocityURead[m1m1]; count++; }
+			if (gGridValidURead[m1p1] == 1) { sum += gVelocityURead[m1p1]; count++; }
 
 			if (count > 0)
 			{
@@ -113,11 +129,26 @@ void ExtrapolateV(uint3 id : SV_DispatchThreadID)
 		int count = 0;
 		if (gGridValidVRead[id.xy] == 0)
 		{
+			uint2 p0p1 = uint2(id.x, id.y + 1);
+			uint2 p0m1 = uint2(id.x, id.y - 1);
+			uint2 p1p0 = uint2(id.x + 1, id.y);
+			uint2 p1m1 = uint2(id.x + 1, id.y - 1);
+			uint2 p1p1 = uint2(id.x + 1, id.y + 1);
+			uint2 m1p0 = uint2(id.x - 1, id.y);
+			uint2 m1m1 = uint2(id.x - 1, id.y - 1);
+			uint2 m1p1 = uint2(id.x - 1, id.y + 1);
+
 			// we can average 3*3 neighbor ,for now ,simple use 4
-			if (gGridValidVRead[uint2(id.x + 1, id.y)] == 1) { sum += gVelocityVRead[uint2(id.x + 1, id.y)]; count++; }
-			if (gGridValidVRead[uint2(id.x - 1, id.y)] == 1) { sum += gVelocityVRead[uint2(id.x - 1, id.y)]; count++; }
-			if (gGridValidVRead[uint2(id.x, id.y + 1)] == 1) { sum += gVelocityVRead[uint2(id.x, id.y + 1)]; count++; }
-			if (gGridValidVRead[uint2(id.x, id.y - 1)] == 1) { sum += gVelocityVRead[uint2(id.x, id.y - 1)]; count++; }
+			if (gGridValidVRead[p0p1] == 1) { sum += gVelocityVRead[p0p1]; count++; }
+			if (gGridValidVRead[p0m1] == 1) { sum += gVelocityVRead[p0m1]; count++; }
+
+			if (gGridValidVRead[p1p0] == 1) { sum += gVelocityVRead[p1p0]; count++; }
+			if (gGridValidVRead[p1m1] == 1) { sum += gVelocityVRead[p1m1]; count++; }
+			if (gGridValidVRead[p1p1] == 1) { sum += gVelocityVRead[p1p1]; count++; }
+
+			if (gGridValidVRead[m1p0] == 1) { sum += gVelocityVRead[m1p0]; count++; }
+			if (gGridValidVRead[m1m1] == 1) { sum += gVelocityVRead[m1m1]; count++; }
+			if (gGridValidVRead[m1p1] == 1) { sum += gVelocityVRead[m1p1]; count++; }
 
 			if (count > 0)
 			{

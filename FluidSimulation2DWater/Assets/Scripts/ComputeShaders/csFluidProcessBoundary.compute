@@ -30,14 +30,14 @@ void ProcessLevelsetBoundary(uint3 id : SV_DispatchThreadID)
 		float sum = 0;
 		int count = 0;
 
-		bool not_x_0 = (i > 0);
-		bool not_x_1 = (i < _xSize - 1);
-		bool not_y_0 = (j > 0);
-		bool not_y_1 = (j < _ySize - 1);
-		if (not_x_1 && CELL_SOLID != gGridMarker[uint2(i + 1, j)]) { sum += gLevelSetRead[uint2(i + 1, j)];     ++count; }
-		if (not_x_0 && CELL_SOLID != gGridMarker[uint2(i - 1, j)]) { sum += gLevelSetRead[uint2(i - 1, j)];     ++count; }
-		if (not_y_1 && CELL_SOLID != gGridMarker[uint2(i, j + 1)]) { sum += gLevelSetRead[uint2(i, j + 1)];     ++count; }
-		if (not_y_0 && CELL_SOLID != gGridMarker[uint2(i, j - 1)]) { sum += gLevelSetRead[uint2(i, j - 1)];     ++count; }
+		bool xgreater0 = (i > 0);
+		bool xsmallWidth = (i < _xSize - 1);
+		bool ygreater0 = (j > 0);
+		bool ysmallHeight = (j < _ySize - 1);
+		if (xsmallWidth  && CELL_SOLID != gGridMarker[uint2(i + 1, j)]) { sum += gLevelSetRead[uint2(i + 1, j)];     ++count; }
+		if (xgreater0	 && CELL_SOLID != gGridMarker[uint2(i - 1, j)]) { sum += gLevelSetRead[uint2(i - 1, j)];     ++count; }
+		if (ysmallHeight && CELL_SOLID != gGridMarker[uint2(i, j + 1)]) { sum += gLevelSetRead[uint2(i, j + 1)];     ++count; }
+		if (ygreater0	 && CELL_SOLID != gGridMarker[uint2(i, j - 1)]) { sum += gLevelSetRead[uint2(i, j - 1)];     ++count; }
 		if (count > 0) {
 			gLevelSetWrite[uint2(i, j)] = sum / (float)count;
 		}
