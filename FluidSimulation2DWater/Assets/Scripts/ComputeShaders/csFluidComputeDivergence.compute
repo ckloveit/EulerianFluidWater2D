@@ -9,82 +9,64 @@ Texture2D<uint> gGridMarker;
 Texture2D<float> gVelocityU;
 Texture2D<float> gVelocityV;
 
-//[numthreads(8, 8, 1)]
-//void ComputeDivergence(uint3 id : SV_DispatchThreadID)
-//{
-//	if (id.x >= _xSize || id.y >= _ySize)
-//		return;
-//	float scale = 1.0 / _gridSpace;
-//	if (gGridMarker[id.xy] == CELL_LIQUID)
-//	{
-//		gVelocityDivergence[id.xy] = -scale * (
-//			(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
-//			(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
-//	}
-//	else {
-//		gVelocityDivergence[id.xy] = 0;
-//	}
-//
-//}
-
-
-//// from bridson book 
-//[numthreads(8, 8, 1)]
-//void ComputeDivergence(uint3 id : SV_DispatchThreadID)
-//{
-//	if (id.x >= _xSize || id.y >= _ySize)
-//		return;
-//	float scale = 1.0 / _gridSpace;
-//	if (gGridMarker[id.xy] == CELL_LIQUID)
-//	{
-//		uint2 leftID   = uint2(id.x - 1, id.y);
-//		uint2 rightID  = uint2(id.x + 1, id.y);
-//		uint2 upID     = uint2(id.x, id.y - 1);
-//		uint2 bottomID = uint2(id.x, id.y + 1);
-//
-//		gVelocityDivergence[id.xy] = -scale * (
-//			(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
-//			(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
-//
-//		// account for solid
-//		if (id.x > 0 && gGridMarker[leftID] == CELL_SOLID)
-//		{
-//			gVelocityDivergence[id.xy] -= scale * (gVelocityU[id.xy] - 0);
-//		}
-//		if (id.x < _xSize && gGridMarker[rightID] == CELL_SOLID)
-//		{
-//			gVelocityDivergence[id.xy] += scale * (gVelocityU[rightID] - 0);
-//		}
-//
-//		if (id.y > 0 && gGridMarker[upID] == CELL_SOLID)
-//		{
-//			gVelocityDivergence[id.xy] -= scale * (gVelocityV[id.xy] - 0);
-//		}
-//		if (id.y < _ySize && gGridMarker[bottomID] == CELL_SOLID)
-//		{
-//			gVelocityDivergence[id.xy] += scale * (gVelocityV[bottomID] - 0);
-//		}
-//
-//	}
-//	else {
-//		gVelocityDivergence[id.xy] = 0;
-//	}
-//
-//}
-
+// from bridson book 
 [numthreads(8, 8, 1)]
 void ComputeDivergence(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _xSize || id.y >= _ySize)
 		return;
+	float scale = 1.0 / _gridSpace;
 	if (gGridMarker[id.xy] == CELL_LIQUID)
 	{
-		gVelocityDivergence[id.xy] = -(
+		uint2 leftID   = uint2(id.x - 1, id.y);
+		uint2 rightID  = uint2(id.x + 1, id.y);
+		uint2 upID     = uint2(id.x, id.y - 1);
+		uint2 bottomID = uint2(id.x, id.y + 1);
+
+		gVelocityDivergence[id.xy] = -scale * (
 			(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
 			(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
+
+		// account for solid
+		if (id.x > 0 && gGridMarker[leftID] == CELL_SOLID)
+		{
+			gVelocityDivergence[id.xy] -= scale * (gVelocityU[id.xy] - 0);
+		}
+		if (id.x < _xSize && gGridMarker[rightID] == CELL_SOLID)
+		{
+			gVelocityDivergence[id.xy] += scale * (gVelocityU[rightID] - 0);
+		}
+
+		if (id.y > 0 && gGridMarker[upID] == CELL_SOLID)
+		{
+			gVelocityDivergence[id.xy] -= scale * (gVelocityV[id.xy] - 0);
+		}
+		if (id.y < _ySize && gGridMarker[bottomID] == CELL_SOLID)
+		{
+			gVelocityDivergence[id.xy] += scale * (gVelocityV[bottomID] - 0);
+		}
+
 	}
 	else {
 		gVelocityDivergence[id.xy] = 0;
 	}
 
 }
+
+// simple version compute divergence
+//[numthreads(8, 8, 1)]
+//void ComputeDivergence(uint3 id : SV_DispatchThreadID)
+//{
+//	if (id.x >= _xSize || id.y >= _ySize)
+//		return;
+//	if (gGridMarker[id.xy] == CELL_LIQUID)
+//	{
+//		gVelocityDivergence[id.xy] = -(
+//			(gVelocityU[uint2(id.x + 1, id.y)] - gVelocityU[id.xy]) +
+//			(gVelocityV[uint2(id.x, id.y + 1)] - gVelocityV[id.xy]));
+//	}
+//	else {
+//		gVelocityDivergence[id.xy] = 0;
+//	}
+//
+//}

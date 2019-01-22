@@ -75,7 +75,7 @@
 					int shade = int(abs(-value) * 255.0);
 					if (value <= 0)
 					{
-						col.rgb = float3(1, 1, 1) * abs(value / 50);
+						col.rgb = float3(1, 1, 1) * abs(value / 10);
 					}
 					/*else
 					{

@@ -1,195 +1,371 @@
 Base path: D:/Program Files/Unity/Unity2018_2_8f1/Unity/Editor/Data
 Cmd: initializeCompiler
-Cmd: compileSnippet
-  api=4 type=0 insize=1582 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1582 outsize=354 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=1842 outsize=1082 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1842 outsize=798 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=1701 outsize=1094 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1701 outsize=522 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=16902 outsize=5666 kw=_SUNDISK_SIMPLE pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=16902 outsize=902 kw=_SUNDISK_SIMPLE pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
+Cmd: preprocessCompute
+  insize=7123 outsize=7132 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=3203 outsize=3206 ok=1
-Cmd: preprocessCompute
-  insize=677 outsize=676 ok=1
-Cmd: preprocessCompute
-  insize=1974 outsize=1975 ok=1
-Cmd: preprocessCompute
-  insize=601 outsize=600 ok=1
-Cmd: preprocessCompute
-  insize=955 outsize=958 ok=1
-Cmd: preprocessCompute
-  insize=8323 outsize=8326 ok=1
-Cmd: preprocessCompute
-  insize=2227 outsize=2232 ok=1
+  insize=7115 outsize=7124 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=2232 outsize=1977 ok=1
-Cmd: preprocessCompute
-  insize=591 outsize=590 ok=1
-Cmd: preprocessCompute
-  insize=941 outsize=940 ok=1
-Cmd: compileComputeKernel
-  api=4 insize=940 outsize=1277 ok=1
-Cmd: preprocessCompute
-  insize=4481 outsize=4480 ok=1
-Cmd: compileComputeKernel
-  api=4 insize=4480 outsize=2057 ok=1
-Cmd: preprocessCompute
-  insize=3838 outsize=3843 ok=1
-Cmd: compileComputeKernel
-  api=4 insize=3843 outsize=1217 ok=1
-Cmd: preprocessCompute
-  insize=2843 outsize=2848 ok=1
-Cmd: preprocess
-  insize=1829 outsize=300 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=1967 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1967 outsize=366 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: preprocessCompute
-  insize=657 outsize=656 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=1341 outsize=790 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1341 outsize=402 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(34): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(39): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(46): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(51): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(58): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(63): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(70): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(75): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(255): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=7124 outsize=2529 ok=1
 Cmd: initializeCompiler
-Cmd: compileSnippet
-  api=4 type=0 insize=1878 outsize=1082 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1878 outsize=778 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
+Cmd: preprocessCompute
+  insize=7116 outsize=7125 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=677 outsize=676 ok=1
-Cmd: preprocessCompute
-  insize=7792 outsize=7801 ok=1
+  insize=8201 outsize=8210 ok=1
 Cmd: compileComputeKernel
-  error: 1 plat 4 at csFluidProjectVelocity.compute(39): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(44): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(51): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(56): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(63): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(68): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(75): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(80): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(278): integer modulus may be much slower, try using uints if possible.
-  error: 1 plat 4 at csFluidProjectVelocity.compute(278): signed/unsigned mismatch, unsigned assumed
-  api=4 insize=7801 outsize=1805 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8210 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=601 outsize=600 ok=1
+  insize=608 outsize=607 ok=1
+Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=955 outsize=958 ok=1
-Cmd: preprocessCompute
-  insize=8709 outsize=8712 ok=1
-Cmd: preprocessCompute
-  insize=2256 outsize=2261 ok=1
+  insize=8209 outsize=8218 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=2261 outsize=629 ok=1
-Cmd: preprocessCompute
-  insize=2444 outsize=2443 ok=1
-Cmd: preprocessCompute
-  insize=941 outsize=940 ok=1
-Cmd: preprocessCompute
-  insize=4481 outsize=4480 ok=1
-Cmd: preprocessCompute
-  insize=4853 outsize=4858 ok=1
-Cmd: preprocessCompute
-  insize=2843 outsize=2848 ok=1
-Cmd: preprocess
-  insize=2002 outsize=300 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2140 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2140 outsize=406 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8218 outsize=2661 ok=1
 Cmd: preprocessCompute
   insize=606 outsize=605 ok=1
 Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8201 outsize=8210 ok=1
+Cmd: preprocessCompute
+  insize=611 outsize=610 ok=1
 Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: preprocess
-  insize=2007 outsize=300 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2145 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2145 outsize=434 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: preprocess
-  insize=1999 outsize=300 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2137 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2137 outsize=478 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=2719 outsize=2724 ok=1
+  insize=8209 outsize=8218 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=2724 outsize=949 ok=1
-Cmd: initializeCompiler
-Cmd: preprocessCompute
-  insize=4360 outsize=4359 ok=1
-Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8218 outsize=2661 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=4376 outsize=4375 ok=1
+  insize=8217 outsize=8226 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=4375 outsize=2153 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8226 outsize=1561 ok=1
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=4376 outsize=4375 ok=1
+  insize=8201 outsize=8210 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=4388 outsize=4387 ok=1
+  insize=8209 outsize=8218 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=4387 outsize=2113 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8218 outsize=1929 ok=1
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=4376 outsize=4375 ok=1
-Cmd: initializeCompiler
-Cmd: preprocessCompute
-  insize=4388 outsize=4387 ok=1
-Cmd: initializeCompiler
+  insize=8201 outsize=8210 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=8846 outsize=8849 ok=1
+  insize=8203 outsize=8212 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=8849 outsize=2317 ok=1
-Cmd: initializeCompiler
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8212 outsize=1561 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: preprocessCompute
-  insize=4370 outsize=4369 ok=1
+  insize=8201 outsize=8210 ok=1
 Cmd: compileComputeKernel
-  api=4 insize=4369 outsize=2033 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8210 outsize=1897 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8201 outsize=8210 ok=1
+Cmd: preprocessCompute
+  insize=8297 outsize=8306 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(106): undeclared identifier 'CELL_FLUID'
+  api=4 insize=8306 outsize=0 ok=0
+Cmd: preprocessCompute
+  insize=8298 outsize=8307 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(295): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8307 outsize=1593 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8324 outsize=8333 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8401 outsize=8410 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(295): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8410 outsize=1973 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8266 outsize=8275 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(293): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8275 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8270 outsize=8279 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(293): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8279 outsize=2029 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8302 outsize=8311 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8277 outsize=8286 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(287): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8286 outsize=1937 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8472 outsize=8481 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8481 outsize=1981 ok=1
 Cmd: initializeCompiler
 Cmd: preprocess
   insize=2003 outsize=300 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2141 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2141 outsize=434 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
 Cmd: initializeCompiler
-Cmd: preprocess
-  insize=2003 outsize=300 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2141 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2141 outsize=434 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
+Cmd: preprocessCompute
+  insize=8472 outsize=8481 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8481 outsize=1981 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8436 outsize=8445 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8445 outsize=1981 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8436 outsize=8445 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8445 outsize=1981 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8448 outsize=8457 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8457 outsize=1981 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8436 outsize=8445 ok=1
+Cmd: preprocessCompute
+  insize=8415 outsize=8424 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(290): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8424 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8435 outsize=8444 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(290): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8444 outsize=1957 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8475 outsize=8484 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8484 outsize=1957 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8469 outsize=8478 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8461 outsize=8470 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8470 outsize=2085 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8334 outsize=8343 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8343 outsize=2033 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8342 outsize=8351 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8351 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8405 outsize=8414 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8414 outsize=2033 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8406 outsize=8415 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8415 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8424 outsize=8433 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(108): undeclared identifier 'diag'
+  api=4 insize=8433 outsize=0 ok=0
+Cmd: preprocessCompute
+  insize=8423 outsize=8432 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8432 outsize=2165 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8445 outsize=8454 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8453 outsize=8462 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8462 outsize=2017 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8445 outsize=8454 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8723 outsize=8732 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(113): undeclared identifier 'gLevelset'
+  api=4 insize=8732 outsize=0 ok=0
+Cmd: preprocessCompute
+  insize=8723 outsize=8732 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(114): undeclared identifier 'cur'
+  api=4 insize=8732 outsize=0 ok=0
+Cmd: preprocessCompute
+  insize=8863 outsize=8872 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(297): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8872 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8834 outsize=8843 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(177): undeclared identifier 'gLevelSet'
+  api=4 insize=8843 outsize=0 ok=0
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8834 outsize=8843 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8843 outsize=2901 ok=1
+Cmd: preprocessCompute
+  insize=2843 outsize=2848 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidFsmLevelset.compute(71): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidFsmLevelset.compute(97): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=2848 outsize=673 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8834 outsize=8843 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8843 outsize=2661 ok=1
+Cmd: preprocessCompute
+  insize=2843 outsize=2848 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8850 outsize=8859 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8859 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8842 outsize=8851 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8851 outsize=2137 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8834 outsize=8843 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8836 outsize=8845 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8845 outsize=2901 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8881 outsize=8890 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8890 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8889 outsize=8898 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8898 outsize=2805 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8887 outsize=8896 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8923 outsize=8932 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8932 outsize=2925 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=8865 outsize=8874 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8874 outsize=2661 ok=1
+Cmd: initializeCompiler
+Cmd: preprocessCompute
+  insize=605 outsize=604 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=604 outsize=1069 ok=1
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler

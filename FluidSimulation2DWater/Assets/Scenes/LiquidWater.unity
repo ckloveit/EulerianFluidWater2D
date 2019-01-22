@@ -50,6 +50,7 @@ LightmapSettings:
     m_BounceScale: 1
     m_IndirectOutputScale: 1
     m_AlbedoBoost: 1
+    m_TemporalCoherenceThreshold: 1
     m_EnvironmentLightingMode: 0
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 1
@@ -116,8 +117,7 @@ NavMeshSettings:
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 429777516}
@@ -133,8 +133,7 @@ GameObject:
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 429777514}
   m_Enabled: 1
   serializedVersion: 8
@@ -171,8 +170,7 @@ Light:
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 429777514}
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
   m_LocalPosition: {x: 0, y: 3, z: 0}
@@ -185,8 +183,7 @@ Transform:
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 732921970}
@@ -204,8 +201,7 @@ GameObject:
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 732921966}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -216,7 +212,7 @@ MonoBehaviour:
   mComputeFluidEmitter: {fileID: 7200000, guid: 92f93b1e3f6b51e4392769a6fe1501c3,
     type: 3}
   mComputeDivergence: {fileID: 7200000, guid: 8708f28184aeeef499390dffa91b635f, type: 3}
-  mComputeProjection: {fileID: 7200000, guid: 26f3e6b0f669d6f42949b625bdcb926c, type: 3}
+  mComputePressure: {fileID: 7200000, guid: 26f3e6b0f669d6f42949b625bdcb926c, type: 3}
   mComputeExtrapolateToAir: {fileID: 7200000, guid: ac8c8d6873e40b34494b69c58b641a85,
     type: 3}
   mComputeAdvect: {fileID: 7200000, guid: 4fa92bd944cd2f4419dde831f30243e1, type: 3}
@@ -230,26 +226,24 @@ MonoBehaviour:
   mComputeCopyTex: {fileID: 7200000, guid: 46d687b14bc34ba48ba8d58a10f645a1, type: 3}
   mWidth: 128
   mHeight: 128
-  mDensity: 1
+  mDensity: 0.5
   enabledDebug: 1
   debugShowTexMaterial: {fileID: 2100000, guid: f6a6cc3d0bac80f48afa50e10b3d0ce4,
     type: 2}
   mSimulateFPS: 100
-  mEnabledRedistanceLevelset: 0
+  mEnabledRedistanceLevelset: 1
 --- !u!81 &732921968
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 732921966}
   m_Enabled: 1
 --- !u!20 &732921969
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 732921966}
   m_Enabled: 1
   serializedVersion: 2
@@ -258,7 +252,6 @@ Camera:
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_GateFitMode: 2
   m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -290,8 +283,7 @@ Camera:
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 732921966}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -10}

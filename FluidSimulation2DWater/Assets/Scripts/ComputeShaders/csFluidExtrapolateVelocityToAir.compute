@@ -37,14 +37,6 @@ void UpdateGridValidU(uint3 id : SV_DispatchThreadID)
 		gGridValidURead[id.xy] = 1;
 		gGridValidUWrite[id.xy] = 1;
 	}
-
-	/*uint rightMarker = gGridMarker[id.xy];
-	if (rightMarker == CELL_LIQUID)
-	{
-		gGridValidURead[id.xy] = 1;
-		gGridValidUWrite[id.xy] = 1;
-	}*/
-
 }
 
 [numthreads(8, 8, 1)]
@@ -65,14 +57,6 @@ void UpdateGridValidV(uint3 id : SV_DispatchThreadID)
 		gGridValidVRead[id.xy] = 1;
 		gGridValidVWrite[id.xy] = 1;
 	}
-
-	/*uint upMarker = gGridMarker[id.xy];
-	if ((upMarker == CELL_LIQUID))
-	{
-		gGridValidVRead[id.xy] = 1;
-		gGridValidVWrite[id.xy] = 1;
-	}*/
-
 }
 
 

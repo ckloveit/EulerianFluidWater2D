@@ -1,53 +1,216 @@
 Base path: D:/Program Files/Unity/Unity2018_2_8f1/Unity/Editor/Data
 Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=958 outsize=657 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(34): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(39): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(46): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(51): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(58): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(63): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(70): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(75): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(255): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(255): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=7124 outsize=1805 ok=1
+Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=8326 outsize=3445 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(34): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(39): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(46): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(51): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(58): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(63): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(70): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(75): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at csFluidComputePressure.compute(255): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(255): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=7125 outsize=1805 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=2232 outsize=629 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8210 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  error: 1 plat 4 at csFluidProjectVelocity.compute(39): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(44): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(51): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(56): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(63): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(68): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(75): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(80): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at csFluidProjectVelocity.compute(278): signed/unsigned mismatch, unsigned assumed
-  api=4 insize=7801 outsize=1561 ok=1
+  api=4 insize=610 outsize=1069 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=8712 outsize=2297 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8226 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
 Cmd: compileComputeKernel
-  api=4 insize=2261 outsize=617 ok=1
+  error: 1 plat 4 at csFluidComputePressure.compute(288): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8210 outsize=1561 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(106): undeclared identifier 'CELL_FLUID'
+  api=4 insize=8306 outsize=0 ok=0
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(295): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8333 outsize=1561 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(295): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(295): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8410 outsize=1805 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(293): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8275 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(293): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8311 outsize=1637 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(287): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8286 outsize=957 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8481 outsize=1637 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8445 outsize=1857 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8445 outsize=1593 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8457 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(290): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(290): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8424 outsize=1805 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(290): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8444 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8484 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8478 outsize=957 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8343 outsize=945 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8351 outsize=945 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(292): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8414 outsize=957 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(108): undeclared identifier 'diag'
+  api=4 insize=8433 outsize=0 ok=0
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(113): undeclared identifier 'gLevelset'
+  api=4 insize=8732 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at csFluidComputePressure.compute(114): undeclared identifier 'cur'
+  api=4 insize=8732 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(297): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(297): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8872 outsize=1805 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8843 outsize=2385 ok=1
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8859 outsize=1805 ok=1
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(296): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8851 outsize=2661 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8898 outsize=1805 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8932 outsize=1561 ok=1
 Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at csFluidComputePressure.compute(300): integer modulus may be much slower, try using uints if possible.
+  error: 1 plat 4 at csFluidComputePressure.compute(300): signed/unsigned mismatch, unsigned assumed
+  api=4 insize=8874 outsize=1889 ok=1
 Cmd: initializeCompiler
 Cmd: initializeCompiler
 Cmd: initializeCompiler

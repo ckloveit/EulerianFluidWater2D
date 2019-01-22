@@ -14,7 +14,7 @@ public class FluidSolver2D : MonoBehaviour
     [HideInInspector]
     public ComputeShader mComputeDivergence; // compute divergence
     [HideInInspector]
-    public ComputeShader mComputeProjection; // projection velocity
+    public ComputeShader mComputePressure; // projection velocity
     [HideInInspector]
     public ComputeShader mComputeExtrapolateToAir; // extropolate velocity to air
     [HideInInspector]
@@ -44,6 +44,7 @@ public class FluidSolver2D : MonoBehaviour
     /* Middle Result  */
     private RenderTexture2D mDivergence;
     private RenderTexture2D mPressure;
+    private RenderTexture2D mPressureWrite;// used for jacobi pressure solver
 
     /* mPoisson 0,1,2 tex */
     private RenderTexture2D mPoisson0;
@@ -106,7 +107,8 @@ public class FluidSolver2D : MonoBehaviour
         mVelocityV[WRITE] = new RenderTexture2D(mWidth, mHeight + 1, "velocityV1");
 
         mDivergence = new RenderTexture2D(mWidth, mHeight,"divergence");
-        mPressure = new RenderTexture2D(mWidth, mHeight,"pressure");
+        mPressure = new RenderTexture2D(mWidth, mHeight, "pressure0");
+        mPressureWrite = new RenderTexture2D(mWidth, mHeight, "pressure1");
 
         mPoisson0 = new RenderTexture2D(mWidth, mHeight, "poisson0");
         mPoisson1 = new RenderTexture2D(mWidth, mHeight, "poisson1");
@@ -387,45 +389,53 @@ public class FluidSolver2D : MonoBehaviour
 
     public void ComputePressureWithJacobi()
     {
-        UploadGlobalParameters(mComputeProjection);
-        int jacobiKernel = mComputeProjection.FindKernel("ComputeJacobiPressure");
+        UploadGlobalParameters(mComputePressure);
+        int jacobiKernel = mComputePressure.FindKernel("ComputeJacobiPressure");
         // 1. compute pressure
         int numLoop = 100;
+        RenderTexture pressureRead = null;
+        RenderTexture pressureWrite = null;
         for (int i=0;i< numLoop; i++)
         {
-            mComputeProjection.SetTexture(jacobiKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(jacobiKernel, "gVelocityDivergence", mDivergence.Source);
-            mComputeProjection.SetTexture(jacobiKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.Dispatch(jacobiKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            pressureRead  = i % 2 == 0 ? mPressure.Source : mPressureWrite.Source;
+            pressureWrite = i % 2 == 0 ? mPressureWrite.Source : mPressure.Source;
+            mComputePressure.SetTexture(jacobiKernel, "gPressure", pressureRead);
+            mComputePressure.SetTexture(jacobiKernel, "gPressureWrite", pressureWrite);
+            mComputePressure.SetTexture(jacobiKernel, "gVelocityDivergence", mDivergence.Source);
+            mComputePressure.SetTexture(jacobiKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.SetTexture(jacobiKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.Dispatch(jacobiKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
         }
-        // 2. projection (subtract divergence of pressure)
-        bool notUseSimpleSubtract = false;
+        if (pressureRead != mPressure.Source)
+            Graphics.CopyTexture(pressureRead, mPressure.Source);
+
+        // 3. projection (subtract divergence of pressure)
+        bool notUseSimpleSubtract = true;
         if (notUseSimpleSubtract)
         {
             // TODO: Exist some bug...
+            int subtractPressureGradientXKernel = mComputePressure.FindKernel("SubtractPressureGradientX");
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gVelocityU", mVelocityU[READ].Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.Dispatch(subtractPressureGradientXKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
-            int subtractPressureGradientXKernel = mComputeProjection.FindKernel("SubtractPressureGradientX");
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gVelocityU", mVelocityU[READ].Source);
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gLevelSet", mLevelSet[READ].Source);
-            mComputeProjection.Dispatch(subtractPressureGradientXKernel, Mathf.CeilToInt((mWidth + 1 ) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
-
-            int subtractPressureGradientYKernel = mComputeProjection.FindKernel("SubtractPressureGradientY");
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gVelocityV", mVelocityV[READ].Source);
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gLevelSet", mLevelSet[READ].Source);
-            mComputeProjection.Dispatch(subtractPressureGradientYKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+            int subtractPressureGradientYKernel = mComputePressure.FindKernel("SubtractPressureGradientY");
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gVelocityV", mVelocityV[READ].Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.Dispatch(subtractPressureGradientYKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
 
         }
         else
         {
-            int applyPressureKernel = mComputeProjection.FindKernel("ApplyPressure");
-            mComputeProjection.SetTexture(applyPressureKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(applyPressureKernel, "gVelocityU", mVelocityU[READ].Source);
-            mComputeProjection.SetTexture(applyPressureKernel, "gVelocityV", mVelocityV[READ].Source);
-            mComputeProjection.Dispatch(applyPressureKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            int applyPressureKernel = mComputePressure.FindKernel("ApplyPressure");
+            mComputePressure.SetTexture(applyPressureKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(applyPressureKernel, "gVelocityU", mVelocityU[READ].Source);
+            mComputePressure.SetTexture(applyPressureKernel, "gVelocityV", mVelocityV[READ].Source);
+            mComputePressure.Dispatch(applyPressureKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
         }
     }
@@ -434,37 +444,37 @@ public class FluidSolver2D : MonoBehaviour
     {
         // red-black gauss-sebel
 
-        UploadGlobalParameters(mComputeProjection);
-        int formPoissonKernel = mComputeProjection.FindKernel("FormPoisson");
+        UploadGlobalParameters(mComputePressure);
+        int formPoissonKernel = mComputePressure.FindKernel("FormPoisson");
         // 1. compute poisson
-        mComputeProjection.SetTexture(formPoissonKernel, "gPoisson0", mPoisson0.Source);
-        mComputeProjection.SetTexture(formPoissonKernel, "gPoisson1", mPoisson1.Source);
-        mComputeProjection.SetTexture(formPoissonKernel, "gPoisson2", mPoisson2.Source);
-        mComputeProjection.SetTexture(formPoissonKernel, "gGridMarker", mGridMarker.Source);
-        mComputeProjection.SetTexture(formPoissonKernel, "gLevelset", mLevelSet[READ].Source);
-        mComputeProjection.Dispatch(formPoissonKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+        mComputePressure.SetTexture(formPoissonKernel, "gPoisson0", mPoisson0.Source);
+        mComputePressure.SetTexture(formPoissonKernel, "gPoisson1", mPoisson1.Source);
+        mComputePressure.SetTexture(formPoissonKernel, "gPoisson2", mPoisson2.Source);
+        mComputePressure.SetTexture(formPoissonKernel, "gGridMarker", mGridMarker.Source);
+        mComputePressure.SetTexture(formPoissonKernel, "gLevelSet", mLevelSet[READ].Source);
+        mComputePressure.Dispatch(formPoissonKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
         // 2. red-black gaus sebel
-        int RBGSKernel = mComputeProjection.FindKernel("RBGS");
+        int RBGSKernel = mComputePressure.FindKernel("RBGS");
         for (int i = 0; i < 200; i++)
         {
-            mComputeProjection.SetInt("_redOrBlack", 0);
-            mComputeProjection.SetTexture(RBGSKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gVelocityDivergence", mDivergence.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPoisson0", mPoisson0.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPoisson1", mPoisson1.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPoisson2", mPoisson2.Source);
-            mComputeProjection.Dispatch(RBGSKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            mComputePressure.SetInt("_redOrBlack", 0);
+            mComputePressure.SetTexture(RBGSKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gVelocityDivergence", mDivergence.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPoisson0", mPoisson0.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPoisson1", mPoisson1.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPoisson2", mPoisson2.Source);
+            mComputePressure.Dispatch(RBGSKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
-            mComputeProjection.SetInt("_redOrBlack", 1);
-            mComputeProjection.SetTexture(RBGSKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gVelocityDivergence", mDivergence.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPoisson0", mPoisson0.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPoisson1", mPoisson1.Source);
-            mComputeProjection.SetTexture(RBGSKernel, "gPoisson2", mPoisson2.Source);
-            mComputeProjection.Dispatch(RBGSKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            mComputePressure.SetInt("_redOrBlack", 1);
+            mComputePressure.SetTexture(RBGSKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gVelocityDivergence", mDivergence.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPoisson0", mPoisson0.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPoisson1", mPoisson1.Source);
+            mComputePressure.SetTexture(RBGSKernel, "gPoisson2", mPoisson2.Source);
+            mComputePressure.Dispatch(RBGSKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
         }
 
         // 3. projection (subtract divergence of pressure)
@@ -472,28 +482,28 @@ public class FluidSolver2D : MonoBehaviour
         if (notUseSimpleSubtract)
         {
             // TODO: Exist some bug...
-            int subtractPressureGradientXKernel = mComputeProjection.FindKernel("SubtractPressureGradientX");
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gVelocityU", mVelocityU[READ].Source);
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientXKernel, "gLevelSet", mLevelSet[READ].Source);
-            mComputeProjection.Dispatch(subtractPressureGradientXKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            int subtractPressureGradientXKernel = mComputePressure.FindKernel("SubtractPressureGradientX");
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gVelocityU", mVelocityU[READ].Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.Dispatch(subtractPressureGradientXKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
-            int subtractPressureGradientYKernel = mComputeProjection.FindKernel("SubtractPressureGradientY");
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gVelocityV", mVelocityV[READ].Source);
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gGridMarker", mGridMarker.Source);
-            mComputeProjection.SetTexture(subtractPressureGradientYKernel, "gLevelSet", mLevelSet[READ].Source);
-            mComputeProjection.Dispatch(subtractPressureGradientYKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+            int subtractPressureGradientYKernel = mComputePressure.FindKernel("SubtractPressureGradientY");
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gVelocityV", mVelocityV[READ].Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.Dispatch(subtractPressureGradientYKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
 
         }
         else
         {
-            int applyPressureKernel = mComputeProjection.FindKernel("ApplyPressure");
-            mComputeProjection.SetTexture(applyPressureKernel, "gPressure", mPressure.Source);
-            mComputeProjection.SetTexture(applyPressureKernel, "gVelocityU", mVelocityU[READ].Source);
-            mComputeProjection.SetTexture(applyPressureKernel, "gVelocityV", mVelocityV[READ].Source);
-            mComputeProjection.Dispatch(applyPressureKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+            int applyPressureKernel = mComputePressure.FindKernel("ApplyPressure");
+            mComputePressure.SetTexture(applyPressureKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(applyPressureKernel, "gVelocityU", mVelocityU[READ].Source);
+            mComputePressure.SetTexture(applyPressureKernel, "gVelocityV", mVelocityV[READ].Source);
+            mComputePressure.Dispatch(applyPressureKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
         }
     }
