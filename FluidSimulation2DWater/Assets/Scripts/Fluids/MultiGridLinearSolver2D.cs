@@ -37,10 +37,12 @@ public class MultiGridLinearSolver2D
     {
         MultiGridLinearSolver2D multiGridSolver = new MultiGridLinearSolver2D();
         multiGridSolver.mMaxLevel = maxLevel;
-        multiGridSolver.mCellMakerArray    = new RenderTexture2D[maxLevel];
-        multiGridSolver.mResidualTexArray  = new RenderTexture2D[maxLevel];
-        multiGridSolver.mErrorTexArray     = new RenderTexture2D[maxLevel];
-        multiGridSolver.mErrorTexSwapArray = new RenderTexture2D[maxLevel];
+        multiGridSolver.mCellMakerArray       = new RenderTexture2D[maxLevel];
+        multiGridSolver.mResidualTexArray     = new RenderTexture2D[maxLevel];
+        multiGridSolver.mErrorTexArray        = new RenderTexture2D[maxLevel];
+        multiGridSolver.mErrorTexSwapArray    = new RenderTexture2D[maxLevel];
+        multiGridSolver.mRightPoissonTexArray = new RenderTexture2D[maxLevel];
+        multiGridSolver.mLevelsetArray        = new RenderTexture2D[maxLevel];
         // sets level0 
         multiGridSolver.mRightPoissonTexArray[0] = level0Divergence;
         multiGridSolver.mCellMakerArray[0] = level0Marker;

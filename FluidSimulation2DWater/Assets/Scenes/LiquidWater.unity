@@ -224,6 +224,10 @@ MonoBehaviour:
   mComputeUpdateFluidMarker: {fileID: 7200000, guid: 3ad6a597f6b337645a226ea7b40b1746,
     type: 3}
   mComputeCopyTex: {fileID: 7200000, guid: 46d687b14bc34ba48ba8d58a10f645a1, type: 3}
+  mComputeRestrict: {fileID: 0}
+  mComputeResidual: {fileID: 0}
+  mComputePrologation: {fileID: 0}
+  mComputeCorrect: {fileID: 0}
   mWidth: 128
   mHeight: 128
   mDensity: 0.5
@@ -232,6 +236,7 @@ MonoBehaviour:
     type: 2}
   mSimulateFPS: 100
   mEnabledRedistanceLevelset: 1
+  mPressureSolverType: 1
 --- !u!81 &732921968
 AudioListener:
   m_ObjectHideFlags: 0
