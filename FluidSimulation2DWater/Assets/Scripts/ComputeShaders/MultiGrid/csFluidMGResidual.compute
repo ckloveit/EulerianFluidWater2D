@@ -1,0 +1,42 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MGResidual
+#include "../csFluidVariables.cginc"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float> gRightPoissonTex;
+RWTexture2D<float> gCurrentTex;
+RWTexture2D<float> gResidualTex;
+Texture2D<uint> gCurentLevelGridMarker;
+uint _currentXSize;
+uint _currentYSize;
+
+[numthreads(8,8,1)]
+void MGResidual(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	uint2 idxLeft	 = uint2(id.x - 1, id.y);
+	uint2 idxRight	 = uint2(id.x + 1, id.y);
+	uint2 idxTop	 = uint2(id.x, id.y - 1);
+	uint2 idxBottom  = uint2(id.x, id.y + 1);
+	float diag = 4.0;
+	float L = 0;
+	float R = 0;
+	float T = 0;
+	float B = 0;
+	float center = gCurrentTex[id.xy];
+	float f = gRightPoissonTex[id.xy];
+
+	if (gCurentLevelGridMarker[idxLeft] == CELL_SOLID) { diag -= 1.0; }
+	if (gCurentLevelGridMarker[idxRight] == CELL_SOLID) { diag -= 1.0; }
+	if (gCurentLevelGridMarker[idxTop] == CELL_SOLID) { diag -= 1.0; }
+	if (gCurentLevelGridMarker[idxBottom] == CELL_SOLID) { diag -= 1.0; }
+
+	if (gCurentLevelGridMarker[idxLeft] == CELL_LIQUID) { L = gCurrentTex[idxLeft]; }
+	if (gCurentLevelGridMarker[idxRight] == CELL_LIQUID) { R = gCurrentTex[idxRight]; }
+	if (gCurentLevelGridMarker[idxTop] == CELL_LIQUID) { T = gCurrentTex[idxTop]; }
+	if (gCurentLevelGridMarker[idxBottom] == CELL_LIQUID) { B = gCurrentTex[idxBottom]; }
+
+	gResidualTex[id.xy] = f - (4.0 * center - L - R - T - B);
+}

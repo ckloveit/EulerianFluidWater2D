@@ -14,6 +14,3 @@ static uint mGroupThreadSizeX = 8;
 static uint CELL_AIR = 0;
 static uint CELL_LIQUID = 1;
 static uint CELL_SOLID = 2;
-//static int AIR = 0;
-//static int LIQUID = 1;
-//static int SOLID = 2;

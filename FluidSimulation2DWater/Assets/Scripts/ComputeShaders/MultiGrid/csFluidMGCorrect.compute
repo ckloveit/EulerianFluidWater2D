@@ -1,0 +1,20 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MGCorrect
+
+#include "../csFluidVariables.cginc"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float> gNeedCorrectTex;
+Texture2D<float> gErrorTex;
+
+uint _currentXSize;
+uint _currentYSize;
+
+[numthreads(8, 8, 1)]
+void MGCorrect(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	gNeedCorrectTex[id.xy] += gErrorTex[id.xy];
+}

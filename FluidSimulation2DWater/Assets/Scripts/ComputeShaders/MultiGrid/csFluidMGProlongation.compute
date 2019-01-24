@@ -1,0 +1,56 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MGProlongation
+
+#include "../csFluidVariables.cginc"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float> gSourceHalfTex;
+RWTexture2D<float> gDestinationFullTex;
+
+Texture2D<uint> gGridMarker;
+uint _currentXSize;
+uint _currentYSize;
+bool IsCellInSolid(uint2 pos)
+{
+	if (gGridMarker[pos] == CELL_SOLID)
+		return true;
+	else
+		return false;
+}
+
+[numthreads(8, 8, 1)]
+void MGProlongation(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	uint2 idxHalf = id.xy / 2;
+	if (IsCellInSolid(id.xy))
+	{
+		gDestinationFullTex[id.xy] = gSourceHalfTex[id.xy / 2];
+	}
+	else
+	{
+		if (id.x % 2 == 0 && id.y % 2 == 0)
+		{
+			gDestinationFullTex[id.xy] = gSourceHalfTex[idxHalf];
+		}
+		else if (id.x % 2 == 0 && id.y % 2 == 1)
+		{
+			gDestinationFullTex[id.xy] = 0.5 * (gSourceHalfTex[uint2(idxHalf.x, idxHalf.y)] +
+				gSourceHalfTex[uint2(idxHalf.x, idxHalf.y + 1)]);
+		}
+		else if (id.x % 2 == 0 && id.y % 2 == 1)
+		{
+			gDestinationFullTex[id.xy] = 0.5 * (gSourceHalfTex[uint2(idxHalf.x, idxHalf.y)] +
+				gSourceHalfTex[uint2(idxHalf.x + 1, idxHalf.y)]);
+		}
+		else {
+			gDestinationFullTex[id.xy] = 0.25 * (
+				gSourceHalfTex[uint2(idxHalf.x, idxHalf.y)] +
+				gSourceHalfTex[uint2(idxHalf.x + 1, idxHalf.y)] + 
+				gSourceHalfTex[uint2(idxHalf.x, idxHalf.y + 1)] +
+				gSourceHalfTex[uint2(idxHalf.x + 1, idxHalf.y + 1)]);
+		}
+	}
+}

@@ -1,0 +1,75 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MGRestrictionInject
+#pragma kernel MGRestrictionHalfWeighting
+#pragma kernel MGRestrictionFullWeighting
+
+#pragma kernel MGRestrictionForCellMarker
+
+#include "../csFluidVariables.cginc"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float> gSourceTex;
+RWTexture2D<float> gDestinationHalfTex;
+uint _currentXSize;
+uint _currentYSize;
+
+[numthreads(8,8,1)]
+void MGRestrictionInject(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	gDestinationHalfTex[id.xy] = gSourceTex[id.xy * 2];
+}
+
+[numthreads(8, 8, 1)]
+void MGRestrictionHalfWeighting(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	uint2 idxLeft    = uint2(id.x * 2 - 1, id.y * 2);
+	uint2 idxRight   = uint2(id.x * 2 + 1, id.y * 2);
+	uint2 idxTop     = uint2(id.x * 2, id.y * 2 - 1);
+	uint2 idxBottom  = uint2(id.x * 2, id.y * 2 + 1);
+
+	gDestinationHalfTex[id.xy] = (gSourceTex[idxLeft] + gSourceTex[idxRight] + gSourceTex[idxTop] + gSourceTex[idxBottom] + 4 * gSourceTex[id.xy]) / 8.0;
+}
+
+[numthreads(8, 8, 1)]
+void MGRestrictionFullWeighting(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	uint2 idxTopLeft	 = uint2(id.x * 2 - 1, id.y * 2);
+	uint2 idxTop		 = uint2(id.x * 2, id.y * 2 - 1);
+	uint2 idxTopRight	 = uint2(id.x * 2 - 1, id.y * 2);
+	uint2 idxLeft		 = uint2(id.x * 2 - 1, id.y * 2);
+	uint2 idxRight		 = uint2(id.x * 2 + 1, id.y * 2);
+	uint2 idxBottomLeft  = uint2(id.x * 2 + 1, id.y * 2);
+	uint2 idxBottom		 = uint2(id.x * 2, id.y * 2 + 1);
+	uint2 idxBottomRight = uint2(id.x * 2 + 1, id.y * 2);
+
+	float topLeft		= gSourceTex[idxTopLeft];
+	float top			= gSourceTex[idxTop];
+	float topRight		= gSourceTex[idxTopRight];
+	float left			= gSourceTex[idxLeft];
+	float center		= gSourceTex[id.xy];
+	float right			= gSourceTex[idxRight];
+	float bottomLeft	= gSourceTex[idxBottomLeft];
+	float bottom		= gSourceTex[idxBottom];
+	float bottomRight	= gSourceTex[idxBottomRight];
+
+	gDestinationHalfTex[id.xy] = (4.0 * center + 2.0 * (top + left + right + bottom) + topLeft + topRight + bottomLeft + bottomRight) / 16.0;
+}
+
+
+/* Restrict for fluid cell marker */
+Texture2D<uint> gSourceMarkerTex;
+RWTexture2D<uint> gDestinationHalfMarkerTex;
+[numthreads(8, 8, 1)]
+void MGRestrictionForCellMarker(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _currentXSize || id.y >= _currentYSize)
+		return;
+	gDestinationHalfMarkerTex[id.xy] = gSourceMarkerTex[id.xy * 2];
+}

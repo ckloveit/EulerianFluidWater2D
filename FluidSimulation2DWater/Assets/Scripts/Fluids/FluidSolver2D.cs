@@ -3,6 +3,13 @@ using System.Collections;
 
 public class FluidSolver2D : MonoBehaviour
 {
+    public enum FluidPressureSolverType
+    {
+        Jacobi,
+        RedBlackGaussSeidel,
+        MultiGrid
+    }
+
     private int READ = 0;
     private int WRITE = 1;
     private const int mGroupThreadSizeX = 8;
@@ -29,6 +36,16 @@ public class FluidSolver2D : MonoBehaviour
     public ComputeShader mComputeUpdateFluidMarker;// update grid marker
     [HideInInspector]
     public ComputeShader mComputeCopyTex; // copy texture
+
+    /*for Multigrid */
+    [HideInInspector]
+    public ComputeShader mComputeRestrict;
+    [HideInInspector]
+    public ComputeShader mComputeResidual;
+    [HideInInspector]
+    public ComputeShader mComputePrologation;
+    [HideInInspector]
+    public ComputeShader mComputeCorrect;
 
 
     /* Fluid quantities */
@@ -79,11 +96,14 @@ public class FluidSolver2D : MonoBehaviour
     public Material debugShowTexMaterial;
 
     public int mSimulateFPS = 10;
-
     public bool mEnabledRedistanceLevelset = true;
+    public FluidPressureSolverType mPressureSolverType = FluidPressureSolverType.RedBlackGaussSeidel;
 
     private System.DateTime currentTime;
     private float simulateStepSeconds;
+
+
+    private MultiGridLinearSolver2D mMultiGridSolver;
 
     private void Start()
     {
@@ -159,6 +179,19 @@ public class FluidSolver2D : MonoBehaviour
         mComputeInitialize.Dispatch(initKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
         UpdateFluidGridMarker();//
+
+        if (mPressureSolverType == FluidPressureSolverType.MultiGrid)
+        {
+            int maxLevel = 4;
+            mMultiGridSolver = MultiGridLinearSolver2D.Build(maxLevel, mWidth, mHeight, mPressure,
+                mPressureWrite, mGridMarker, mDivergence, mLevelSet[READ]);
+            mMultiGridSolver.mComputePressure = mComputePressure;
+            mMultiGridSolver.mComputeRestrict = mComputeRestrict;
+            mMultiGridSolver.mComputeResidual = mComputeResidual;
+            mMultiGridSolver.mComputePrologation = mComputePrologation;
+            mMultiGridSolver.mComputeCorrect = mComputeCorrect;
+        }
+
     }
 
     // nSteps : every frame 
@@ -209,7 +242,8 @@ public class FluidSolver2D : MonoBehaviour
         ComputeDivergence();
         // 5.2 calculate pressure (use jaccobin , red-black gauss-sibel,multi-grid ),subtract divergence pressure
         //ComputePressureWithJacobi();
-        ComputePressureWithRGGS();
+        //ComputePressureWithRGGS();
+        ComputePressure();
 
         //// 6. extrapolate velocity to air with two grid(need to improve)
         ExtrapolateVelocityToAirGPU();
@@ -272,6 +306,25 @@ public class FluidSolver2D : MonoBehaviour
         mComputeKeepBoundary.SetTexture(SolidBoundaryForVelocityKernel, "gVelocityV", mVelocityV[READ].Source);
         mComputeKeepBoundary.Dispatch(SolidBoundaryForVelocityKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
 
+    }
+
+    public void ComputePressure()
+    {
+        switch (mPressureSolverType)
+        {
+            case FluidPressureSolverType.Jacobi:
+                ComputePressureWithJacobi();
+                break;
+            case FluidPressureSolverType.RedBlackGaussSeidel:
+                ComputePressureWithRGGS();
+                break;
+            case FluidPressureSolverType.MultiGrid:
+                // not implement
+                // TODO:
+                // use red-black-gs instead
+                ComputePressureWithMultigrid();
+                break;
+        }
     }
 
     private void ExtrapolateVelocityToAirGPU()
@@ -338,6 +391,8 @@ public class FluidSolver2D : MonoBehaviour
         }
 
     }
+
+
 
     private void AdvectGPU()
     {
@@ -508,6 +563,46 @@ public class FluidSolver2D : MonoBehaviour
         }
     }
 
+
+    public void ComputePressureWithMultigrid()
+    {
+        UploadGlobalParameters(mComputePressure);
+
+        // 1.start Multigrid solver
+        mMultiGridSolver.MultigridSolveVCycle();
+
+        // 2. projection (subtract divergence of pressure)
+        bool notUseSimpleSubtract = true;
+        if (notUseSimpleSubtract)
+        {
+            // TODO: Exist some bug...
+            int subtractPressureGradientXKernel = mComputePressure.FindKernel("SubtractPressureGradientX");
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gVelocityU", mVelocityU[READ].Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(subtractPressureGradientXKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.Dispatch(subtractPressureGradientXKernel, Mathf.CeilToInt((mWidth + 1) * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+
+            int subtractPressureGradientYKernel = mComputePressure.FindKernel("SubtractPressureGradientY");
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gVelocityV", mVelocityV[READ].Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gGridMarker", mGridMarker.Source);
+            mComputePressure.SetTexture(subtractPressureGradientYKernel, "gLevelSet", mLevelSet[READ].Source);
+            mComputePressure.Dispatch(subtractPressureGradientYKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt((mHeight + 1) * 1.0f / mGroupThreadSizeX), 1);
+
+        }
+        else
+        {
+            int applyPressureKernel = mComputePressure.FindKernel("ApplyPressure");
+            mComputePressure.SetTexture(applyPressureKernel, "gPressure", mPressure.Source);
+            mComputePressure.SetTexture(applyPressureKernel, "gVelocityU", mVelocityU[READ].Source);
+            mComputePressure.SetTexture(applyPressureKernel, "gVelocityV", mVelocityV[READ].Source);
+            mComputePressure.Dispatch(applyPressureKernel, Mathf.CeilToInt(mWidth * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mHeight * 1.0f / mGroupThreadSizeX), 1);
+
+        }
+    }
+
+
     private void RedistanceLevelSet()
     {
         if (mEnabledRedistanceLevelset == false)
@@ -561,4 +656,28 @@ public class FluidSolver2D : MonoBehaviour
     }
 
 
+    private void OnDestroy()
+    {
+        FluidCore.SafeRelease(mVelocityU[READ]);
+        FluidCore.SafeRelease(mVelocityU[WRITE]);
+        FluidCore.SafeRelease(mVelocityV[READ]);
+        FluidCore.SafeRelease(mVelocityV[WRITE]);
+        FluidCore.SafeRelease(mLevelSet[READ]);
+        FluidCore.SafeRelease(mLevelSet[WRITE]);
+        FluidCore.SafeRelease(mGridMarker);
+        FluidCore.SafeRelease(mGridValidU[READ]);
+        FluidCore.SafeRelease(mGridValidU[WRITE]);
+        FluidCore.SafeRelease(mGridValidV[READ]);
+        FluidCore.SafeRelease(mGridValidV[WRITE]);
+        FluidCore.SafeRelease(mDivergence);
+        FluidCore.SafeRelease(mPressure);
+        FluidCore.SafeRelease(mPressureWrite);
+        FluidCore.SafeRelease(mPoisson0);
+        FluidCore.SafeRelease(mPoisson1);
+        FluidCore.SafeRelease(mPoisson2);
+        if (mMultiGridSolver != null)
+        {
+            mMultiGridSolver.Release();
+        }
+    }
 }

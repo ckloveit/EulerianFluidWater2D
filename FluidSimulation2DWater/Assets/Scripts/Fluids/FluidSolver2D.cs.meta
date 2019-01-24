@@ -22,6 +22,11 @@ MonoImporter:
   - mComputeUpdateFluidMarker: {fileID: 7200000, guid: 3ad6a597f6b337645a226ea7b40b1746,
       type: 3}
   - mComputeCopyTex: {fileID: 7200000, guid: 46d687b14bc34ba48ba8d58a10f645a1, type: 3}
+  - mComputeRestrict: {fileID: 7200000, guid: 15b74d4872be9f4428f4fdd48965d125, type: 3}
+  - mComputeResidual: {fileID: 7200000, guid: 7f8db3893eb00dc4c9f95f77fd22a892, type: 3}
+  - mComputePrologation: {fileID: 7200000, guid: 60fe161139e129e41919b1b697b48597,
+      type: 3}
+  - mComputeCorrect: {fileID: 7200000, guid: e9b9ea10a3ea4bf47933d468ac2cec78, type: 3}
   - debugShowTexMaterial: {fileID: 2100000, guid: f6a6cc3d0bac80f48afa50e10b3d0ce4,
       type: 2}
   executionOrder: 0
