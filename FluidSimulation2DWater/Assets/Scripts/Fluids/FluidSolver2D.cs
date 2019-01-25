@@ -187,11 +187,8 @@ public class FluidSolver2D : MonoBehaviour
             int maxLevel = 3;
             mMultiGridSolver = MultiGridLinearSolver2D.Build(maxLevel, mWidth, mHeight, mPressure,
                 mPressureWrite, mGridMarker, mDivergence, mLevelSet[READ]);
-            mMultiGridSolver.mComputePressure = mComputePressure;
-            mMultiGridSolver.mComputeRestrict = mComputeRestrict;
-            mMultiGridSolver.mComputeResidual = mComputeResidual;
-            mMultiGridSolver.mComputePrologation = mComputePrologation;
-            mMultiGridSolver.mComputeCorrect = mComputeCorrect;
+            mMultiGridSolver.SetMGComputeShaders(mComputePressure,
+                mComputeRestrict, mComputeResidual, mComputePrologation, mComputeCorrect);
         }
 
     }

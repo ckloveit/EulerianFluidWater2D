@@ -5,20 +5,16 @@ public class MultiGridLinearSolver2D
 {
     public enum RestrictType
     {
-        Normal, // restrict for normal quantity
-        Marker  // restrict for cell marker quantity
+        Normal, // restrict for normal quantity (float type)
+        Marker  // restrict for cell marker quantity (uint type)
     }
-
-    // need adjust in future
-    // TODO:
     private const int mGroupThreadSizeX = 8;
 
-
-    public ComputeShader mComputePressure;
-    public ComputeShader mComputeRestrict;
-    public ComputeShader mComputeResidual;
-    public ComputeShader mComputePrologation;
-    public ComputeShader mComputeCorrect;
+    private ComputeShader mComputePressure;
+    private ComputeShader mComputeRestrict;
+    private ComputeShader mComputeResidual;
+    private ComputeShader mComputePrologation;
+    private ComputeShader mComputeCorrect;
 
     private RenderTexture2D[] mResidualTexArray;
     private RenderTexture2D[] mErrorTexArray;
@@ -27,7 +23,6 @@ public class MultiGridLinearSolver2D
 
     private RenderTexture2D[] mCellMakerArray;
     private RenderTexture2D[] mLevelsetArray;
-    private RenderTexture2D[] mErrorTempArray;
 
     private int mMaxLevel = 0;
 
@@ -44,7 +39,6 @@ public class MultiGridLinearSolver2D
         multiGridSolver.mErrorTexSwapArray    = new RenderTexture2D[maxLevel];
         multiGridSolver.mRightPoissonTexArray = new RenderTexture2D[maxLevel];
         multiGridSolver.mLevelsetArray        = new RenderTexture2D[maxLevel];
-        multiGridSolver.mErrorTempArray = new RenderTexture2D[maxLevel];
         // sets level0 
         multiGridSolver.mRightPoissonTexArray[0] = level0Divergence;
         multiGridSolver.mCellMakerArray[0] = level0Marker;
@@ -52,8 +46,6 @@ public class MultiGridLinearSolver2D
         multiGridSolver.mErrorTexArray[0] = level0Pressure;
         multiGridSolver.mErrorTexSwapArray[0] = level0PressureSwap;
         multiGridSolver.mLevelsetArray[0] = level0Levelset;
-
-        multiGridSolver.mErrorTempArray[0] = new RenderTexture2D(finerWidth, finerHeight, "MG_ErrorTemp" + 0.ToString());
         for (int i = 1;i<maxLevel;i++)
         {
             int currentWidth  = finerWidth >> i;
@@ -64,10 +56,19 @@ public class MultiGridLinearSolver2D
             multiGridSolver.mErrorTexArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_Error" + i.ToString());
             multiGridSolver.mErrorTexSwapArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_ErrorSwap" + i.ToString());
             multiGridSolver.mRightPoissonTexArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_RightPoisson" + i.ToString());
-
-            multiGridSolver.mErrorTempArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_ErrorTemp" + 0.ToString());
         }
         return multiGridSolver;
+    }
+
+    public void SetMGComputeShaders(ComputeShader computePressure, ComputeShader computeRestrict, 
+        ComputeShader computeResidual,ComputeShader computePrologation,
+        ComputeShader computeCorrect)
+    {
+        mComputePressure = computePressure;
+        mComputeRestrict = computeRestrict;
+        mComputeResidual = computeResidual;
+        mComputePrologation = computePrologation;
+        mComputeCorrect = computeCorrect;
     }
 
     public void MultigridSolveVCycle()
@@ -91,7 +92,7 @@ public class MultiGridLinearSolver2D
         for(int curLevel =mMaxLevel - 2; curLevel >= 0; curLevel--)
         {
             // Prologation
-            Prologation(curLevel, mErrorTexArray[curLevel + 1], /*mErrorTexSwapArray[curLevel]*/mErrorTempArray[curLevel]);
+            Prologation(curLevel, mErrorTexArray[curLevel + 1], mErrorTexSwapArray[curLevel]);
             VCycle(curLevel);
         }
         VCycle(0);
@@ -121,10 +122,9 @@ public class MultiGridLinearSolver2D
         }
 
         // Prologation
-        Prologation(curLevel, mErrorTexArray[curLevel + 1], /*mErrorTexSwapArray[curLevel]*/mErrorTempArray[curLevel]);
-
+        Prologation(curLevel, mErrorTexArray[curLevel + 1], mErrorTexSwapArray[curLevel]);
         // correct
-        Correct(mErrorTexArray[curLevel], mErrorTempArray[curLevel]);
+        Correct(mErrorTexArray[curLevel], mErrorTexSwapArray[curLevel]);
         // post-smoothing
         Smooth(curLevel, 1.0f, 20);
 
