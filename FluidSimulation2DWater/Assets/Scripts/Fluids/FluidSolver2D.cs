@@ -7,7 +7,8 @@ public class FluidSolver2D : MonoBehaviour
     {
         Jacobi,
         RedBlackGaussSeidel,
-        MultiGrid
+        MultiGridVCycle,
+        MultiGridFMG
     }
 
     private int READ = 0;
@@ -180,7 +181,8 @@ public class FluidSolver2D : MonoBehaviour
 
         UpdateFluidGridMarker();//
 
-        if (mPressureSolverType == FluidPressureSolverType.MultiGrid)
+        if (mPressureSolverType == FluidPressureSolverType.MultiGridFMG || 
+            mPressureSolverType == FluidPressureSolverType.MultiGridVCycle)
         {
             int maxLevel = 3;
             mMultiGridSolver = MultiGridLinearSolver2D.Build(maxLevel, mWidth, mHeight, mPressure,
@@ -318,7 +320,8 @@ public class FluidSolver2D : MonoBehaviour
             case FluidPressureSolverType.RedBlackGaussSeidel:
                 ComputePressureWithRGGS();
                 break;
-            case FluidPressureSolverType.MultiGrid:
+            case FluidPressureSolverType.MultiGridVCycle:
+            case FluidPressureSolverType.MultiGridFMG:
                 // not implement
                 // TODO:
                 // use red-black-gs instead
@@ -571,7 +574,10 @@ public class FluidSolver2D : MonoBehaviour
         mMultiGridSolver.UpdateLevel0Tex(mLevelSet[READ]);
         // 1.start Multigrid solver
         //mMultiGridSolver.DebugComputePressure();
-        mMultiGridSolver.MultigridSolveVCycle();
+        if (mPressureSolverType == FluidPressureSolverType.MultiGridVCycle)
+            mMultiGridSolver.MultigridSolveVCycle();
+        else if(mPressureSolverType == FluidPressureSolverType.MultiGridFMG)
+            mMultiGridSolver.MultigridSolveFMG();
 
         // 2. projection (subtract divergence of pressure)
         bool notUseSimpleSubtract = true;

@@ -77,6 +77,27 @@ public class MultiGridLinearSolver2D
         Smooth(0, 2.0f / 3.0f, 20);
     }
 
+    public void MultigridSolveFMG()
+    {
+        for(int curLevel = 0; curLevel < mMaxLevel - 2; curLevel++)
+        {
+            Residual(curLevel);
+            // Restrict
+            Restrict(mResidualTexArray[curLevel], mRightPoissonTexArray[curLevel + 1], RestrictType.Normal);
+            Restrict(mCellMakerArray[curLevel], mCellMakerArray[curLevel + 1], RestrictType.Marker);
+            Restrict(mLevelsetArray[curLevel], mLevelsetArray[curLevel + 1], RestrictType.Normal);
+        }
+        Smooth(mMaxLevel - 1, 1.0f, 20); // caution : if we iterator 5 ,the error is large,so use the Multigrid seem can't solve
+        for(int curLevel =mMaxLevel - 2; curLevel >= 0; curLevel--)
+        {
+            // Prologation
+            Prologation(curLevel, mErrorTexArray[curLevel + 1], /*mErrorTexSwapArray[curLevel]*/mErrorTempArray[curLevel]);
+            VCycle(curLevel);
+        }
+        VCycle(0);
+    }
+
+
     private void VCycle(int curLevel)
     {
         // PreSmoothing
