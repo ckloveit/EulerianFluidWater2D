@@ -19,7 +19,7 @@ void MGRestrictionInject(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _currentXSize || id.y >= _currentYSize)
 		return;
-	gDestinationHalfTex[id.xy] = gSourceTex[id.xy * 2];
+	gDestinationHalfTex[id.xy] = 4.0 * gSourceTex[id.xy * 2];
 }
 
 [numthreads(8, 8, 1)]
@@ -32,7 +32,7 @@ void MGRestrictionHalfWeighting(uint3 id : SV_DispatchThreadID)
 	uint2 idxTop     = uint2(id.x * 2, id.y * 2 - 1);
 	uint2 idxBottom  = uint2(id.x * 2, id.y * 2 + 1);
 
-	gDestinationHalfTex[id.xy] = (gSourceTex[idxLeft] + gSourceTex[idxRight] + gSourceTex[idxTop] + gSourceTex[idxBottom] + 4 * gSourceTex[id.xy]) / 8.0;
+	gDestinationHalfTex[id.xy] = 4.0 * (gSourceTex[idxLeft] + gSourceTex[idxRight] + gSourceTex[idxTop] + gSourceTex[idxBottom] + 4 * gSourceTex[id.xy * 2]) / 8.0;
 }
 
 [numthreads(8, 8, 1)]
@@ -72,4 +72,7 @@ void MGRestrictionForCellMarker(uint3 id : SV_DispatchThreadID)
 	if (id.x >= _currentXSize || id.y >= _currentYSize)
 		return;
 	gDestinationHalfMarkerTex[id.xy] = gSourceMarkerTex[id.xy * 2];
+	if (id.x == _currentXSize - 1 || id.x == 0 || id.y == 0 || id.y == _currentYSize - 1)
+		gDestinationHalfMarkerTex[id.xy] = CELL_SOLID;
+
 }

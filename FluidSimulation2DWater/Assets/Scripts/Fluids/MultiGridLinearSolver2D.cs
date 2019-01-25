@@ -27,6 +27,7 @@ public class MultiGridLinearSolver2D
 
     private RenderTexture2D[] mCellMakerArray;
     private RenderTexture2D[] mLevelsetArray;
+    private RenderTexture2D[] mErrorTempArray;
 
     private int mMaxLevel = 0;
 
@@ -43,6 +44,7 @@ public class MultiGridLinearSolver2D
         multiGridSolver.mErrorTexSwapArray    = new RenderTexture2D[maxLevel];
         multiGridSolver.mRightPoissonTexArray = new RenderTexture2D[maxLevel];
         multiGridSolver.mLevelsetArray        = new RenderTexture2D[maxLevel];
+        multiGridSolver.mErrorTempArray = new RenderTexture2D[maxLevel];
         // sets level0 
         multiGridSolver.mRightPoissonTexArray[0] = level0Divergence;
         multiGridSolver.mCellMakerArray[0] = level0Marker;
@@ -50,6 +52,8 @@ public class MultiGridLinearSolver2D
         multiGridSolver.mErrorTexArray[0] = level0Pressure;
         multiGridSolver.mErrorTexSwapArray[0] = level0PressureSwap;
         multiGridSolver.mLevelsetArray[0] = level0Levelset;
+
+        multiGridSolver.mErrorTempArray[0] = new RenderTexture2D(finerWidth, finerHeight, "MG_ErrorTemp" + 0.ToString());
         for (int i = 1;i<maxLevel;i++)
         {
             int currentWidth  = finerWidth >> i;
@@ -59,6 +63,9 @@ public class MultiGridLinearSolver2D
             multiGridSolver.mResidualTexArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_Residual" + i.ToString());
             multiGridSolver.mErrorTexArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_Error" + i.ToString());
             multiGridSolver.mErrorTexSwapArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_ErrorSwap" + i.ToString());
+            multiGridSolver.mRightPoissonTexArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_RightPoisson" + i.ToString());
+
+            multiGridSolver.mErrorTempArray[i] = new RenderTexture2D(currentWidth, currentHeight, "MG_ErrorTemp" + 0.ToString());
         }
         return multiGridSolver;
     }
@@ -67,24 +74,25 @@ public class MultiGridLinearSolver2D
     {
         VCycle(0);
         // do more smoothing
-        Smooth(0, 2.0f / 3.0f, 5);
+        Smooth(0, 2.0f / 3.0f, 20);
     }
 
     private void VCycle(int curLevel)
     {
         // PreSmoothing
-        Smooth(curLevel, 2.0f / 3.0f, 5);
+        Smooth(curLevel, 1.0f, 20); // caution : if we iterator 5 ,the error is large,so use the Multigrid seem can't solve
         // Compute Residual
         Residual(curLevel);
 
         // Restrict
-        Restrict(mResidualTexArray[curLevel], mRightPoissonTexArray[curLevel + 1],RestrictType.Normal);
+        Restrict(mResidualTexArray[curLevel], mRightPoissonTexArray[curLevel + 1], RestrictType.Normal);
         Restrict(mCellMakerArray[curLevel], mCellMakerArray[curLevel + 1], RestrictType.Marker);
+        Restrict(mLevelsetArray[curLevel], mLevelsetArray[curLevel + 1], RestrictType.Normal);
 
-        if(curLevel == mMaxLevel - 2)
+        if (curLevel == mMaxLevel - 2)
         {
             // smooth
-            Smooth(curLevel + 1, 2.0f / 3.0f, 10);
+            Smooth(curLevel + 1, 1.0f, 20);
         }
         else
         {
@@ -92,15 +100,19 @@ public class MultiGridLinearSolver2D
         }
 
         // Prologation
-        Prologation(curLevel, mErrorTexArray[curLevel + 1], mErrorTexSwapArray[curLevel]);
+        Prologation(curLevel, mErrorTexArray[curLevel + 1], /*mErrorTexSwapArray[curLevel]*/mErrorTempArray[curLevel]);
 
         // correct
-        Correct(mErrorTexArray[curLevel], mErrorTexSwapArray[curLevel]);
+        Correct(mErrorTexArray[curLevel], mErrorTempArray[curLevel]);
         // post-smoothing
-        Smooth(curLevel, 2.0f / 3.0f, 5);
+        Smooth(curLevel, 1.0f, 20);
 
     }
 
+    public void UpdateLevel0Tex(RenderTexture2D level0Levelset)
+    {
+        this.mLevelsetArray[0] = level0Levelset;
+    }
 
     private void Smooth(int curLevel, float SORWeight, int numLoop)
     {
@@ -108,23 +120,30 @@ public class MultiGridLinearSolver2D
         mComputePressure.SetFloat("_SORWeight", SORWeight);
         int WIDTH = mErrorTexArray[curLevel].Width;
         int HEIGHT = mErrorTexArray[curLevel].Height;
-        mComputePressure.SetInt("_currentXSize", mErrorTexArray[curLevel].Width);
-        mComputePressure.SetInt("_currentYSize", mErrorTexArray[curLevel].Height);
-
+        mComputePressure.SetInt("_currentXSize", WIDTH);
+        mComputePressure.SetInt("_currentYSize", HEIGHT);
+        mComputePressure.SetInt("_currentMGLevel", curLevel);
         RenderTexture2D pressureRead = mErrorTexArray[curLevel];
         RenderTexture2D pressureWrite = mErrorTexSwapArray[curLevel];
+
+        //int clearTexKernl = mComputePressure.FindKernel("ClearTex");
+        //mComputePressure.SetTexture(clearTexKernl, "gPressure", pressureRead.Source);
+        //mComputePressure.Dispatch(clearTexKernl, Mathf.CeilToInt(WIDTH * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(HEIGHT * 1.0f / mGroupThreadSizeX), 1);
+
         for (int i = 0; i < numLoop; i++)
         {
+            pressureRead = i % 2 == 0 ? mErrorTexArray[curLevel] : mErrorTexSwapArray[curLevel];
+            pressureWrite = i % 2 == 0 ? mErrorTexSwapArray[curLevel] : mErrorTexArray[curLevel];
             mComputePressure.SetTexture(jacobiSORKernel, "gPressure", pressureRead.Source);
             mComputePressure.SetTexture(jacobiSORKernel, "gPressureWrite", pressureWrite.Source);
             mComputePressure.SetTexture(jacobiSORKernel, "gVelocityDivergence", mRightPoissonTexArray[curLevel].Source);
             mComputePressure.SetTexture(jacobiSORKernel, "gLevelSet", mLevelsetArray[curLevel].Source);
             mComputePressure.SetTexture(jacobiSORKernel, "gCurentLevelGridMarker", mCellMakerArray[curLevel].Source);
             mComputePressure.Dispatch(jacobiSORKernel, Mathf.CeilToInt(WIDTH * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(HEIGHT * 1.0f / mGroupThreadSizeX), 1);
-            Swap(pressureRead, pressureWrite);
         }
-        if (numLoop % 2 == 0)
-            Graphics.CopyTexture(pressureWrite.Source, pressureRead.Source);
+        if (pressureRead != mErrorTexArray[curLevel])
+            Graphics.CopyTexture(pressureRead.Source, mErrorTexArray[curLevel].Source);
+
     }
 
     private void Residual(int curLevel)
@@ -132,13 +151,14 @@ public class MultiGridLinearSolver2D
         int MGResidualKernel = mComputeResidual.FindKernel("MGResidual");
         int WIDTH = mErrorTexArray[curLevel].Width;
         int HEIGHT = mErrorTexArray[curLevel].Height;
-        mComputeResidual.SetInt("_currentXSize", mErrorTexArray[curLevel].Width);
-        mComputeResidual.SetInt("_currentYSize", mErrorTexArray[curLevel].Height);
+        mComputeResidual.SetInt("_currentXSize", WIDTH);
+        mComputeResidual.SetInt("_currentYSize", HEIGHT);
 
         mComputeResidual.SetTexture(MGResidualKernel, "gRightPoissonTex", mRightPoissonTexArray[curLevel].Source);
         mComputeResidual.SetTexture(MGResidualKernel, "gCurrentTex", mErrorTexArray[curLevel].Source);
         mComputeResidual.SetTexture(MGResidualKernel, "gResidualTex", mResidualTexArray[curLevel].Source);
-        mComputeResidual.SetTexture(MGResidualKernel, "gCurentLevelGridMarker", mLevelsetArray[curLevel].Source);
+        mComputeResidual.SetTexture(MGResidualKernel, "gCurentLevelGridMarker", mCellMakerArray[curLevel].Source);
+        mComputeResidual.SetTexture(MGResidualKernel, "gCurrentLevelLevelSet", mLevelsetArray[curLevel].Source);
         mComputeResidual.Dispatch(MGResidualKernel, Mathf.CeilToInt(WIDTH * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(HEIGHT * 1.0f / mGroupThreadSizeX), 1);
 
     }
@@ -178,8 +198,8 @@ public class MultiGridLinearSolver2D
         int MGProlongationKernel = mComputePrologation.FindKernel("MGProlongation");
         int WIDTH = destFullTex.Width;
         int HEIGHT = destFullTex.Height;
-        mComputeResidual.SetInt("_currentXSize", WIDTH);
-        mComputeResidual.SetInt("_currentYSize", HEIGHT);
+        mComputePrologation.SetInt("_currentXSize", WIDTH);
+        mComputePrologation.SetInt("_currentYSize", HEIGHT);
 
         mComputePrologation.SetTexture(MGProlongationKernel, "gSourceHalfTex", sourceHalfTex.Source);
         mComputePrologation.SetTexture(MGProlongationKernel, "gDestinationFullTex", destFullTex.Source);
@@ -209,6 +229,33 @@ public class MultiGridLinearSolver2D
         tex1 = temp;
     }
 
+    public void DebugComputePressure()
+    {
+        int jacobiKernel = mComputePressure.FindKernel("ComputeJacobiPressureSOR");
+        mComputePressure.SetFloat("_SORWeight", 1.0f);
+        int WIDTH = mErrorTexArray[0].Width;
+        int HEIGHT = mErrorTexArray[0].Height;
+        mComputePressure.SetInt("_currentXSize", WIDTH);
+        mComputePressure.SetInt("_currentYSize", HEIGHT);
+        // 1. compute pressure
+        int numLoop = 100;
+        RenderTexture2D pressureRead = mErrorTexArray[0];
+        RenderTexture2D pressureWrite = mErrorTexSwapArray[0];
+        for (int i = 0; i < numLoop; i++)
+        {
+            pressureRead = i % 2 == 0 ? mErrorTexArray[0] : mErrorTexSwapArray[0];
+            pressureWrite = i % 2 == 0 ? mErrorTexSwapArray[0] : mErrorTexArray[0];
+            mComputePressure.SetTexture(jacobiKernel, "gPressure", pressureRead.Source);
+            mComputePressure.SetTexture(jacobiKernel, "gPressureWrite", pressureWrite.Source);
+            mComputePressure.SetTexture(jacobiKernel, "gVelocityDivergence", mRightPoissonTexArray[0].Source);
+            mComputePressure.SetTexture(jacobiKernel, "gLevelSet", mLevelsetArray[0].Source);
+            mComputePressure.SetTexture(jacobiKernel, "gCurentLevelGridMarker", mCellMakerArray[0].Source);
+            mComputePressure.Dispatch(jacobiKernel, Mathf.CeilToInt(mErrorTexArray[0].Width * 1.0f / mGroupThreadSizeX), Mathf.CeilToInt(mErrorTexArray[0].Height * 1.0f / mGroupThreadSizeX), 1);
+            //Swap(pressureRead, pressureWrite);
+        }
+        if (pressureRead != mErrorTexArray[0])
+            Graphics.CopyTexture(pressureRead.Source, mErrorTexArray[0].Source);
+    }
 
     public void Release()
     {

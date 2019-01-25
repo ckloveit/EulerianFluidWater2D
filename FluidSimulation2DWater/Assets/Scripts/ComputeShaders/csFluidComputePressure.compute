@@ -9,6 +9,8 @@
 #pragma kernel FormPoisson
 #pragma kernel RBGS
 
+#pragma kernel ClearTex
+
 #include "csFluidVariables.cginc"
 
 Texture2D<float> gVelocityDivergence;
@@ -319,6 +321,7 @@ void RBGS(uint3 id : SV_DispatchThreadID)
 float _SORWeight;
 uint _currentXSize;
 uint _currentYSize;
+uint _currentMGLevel;
 Texture2D<uint> gCurentLevelGridMarker;
 [numthreads(8, 8, 1)]
 void ComputeJacobiPressureSOR(uint3 id : SV_DispatchThreadID)
@@ -356,7 +359,8 @@ void ComputeJacobiPressureSOR(uint3 id : SV_DispatchThreadID)
 		if (gCurentLevelGridMarker[idxBottom] == CELL_LIQUID) { B = -gPressure[idxBottom]; }
 
 		float current = gPressureWrite[id.xy];
-		float value = (divergence - (L + R + B + T)) / diag;
+		float dx = (1 << _currentMGLevel);
+		float value = (divergence - (L + R + B + T) / (dx * dx)) / diag;
 
 		gPressureWrite[id.xy] = _SORWeight * value + (1.0 - _SORWeight) * current;
 	}
@@ -367,3 +371,8 @@ void ComputeJacobiPressureSOR(uint3 id : SV_DispatchThreadID)
 
 }
 
+[numthreads(8, 8, 1)]
+void ClearTex(uint3 id : SV_DispatchThreadID)
+{
+	gPressure[id.xy] = 0;
+}

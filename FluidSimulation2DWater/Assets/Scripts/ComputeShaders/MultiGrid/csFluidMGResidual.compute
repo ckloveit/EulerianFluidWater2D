@@ -8,6 +8,7 @@ RWTexture2D<float> gRightPoissonTex;
 RWTexture2D<float> gCurrentTex;
 RWTexture2D<float> gResidualTex;
 Texture2D<uint> gCurentLevelGridMarker;
+Texture2D<float> gCurrentLevelLevelSet;
 uint _currentXSize;
 uint _currentYSize;
 
@@ -16,27 +17,43 @@ void MGResidual(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _currentXSize || id.y >= _currentYSize)
 		return;
-	uint2 idxLeft	 = uint2(id.x - 1, id.y);
-	uint2 idxRight	 = uint2(id.x + 1, id.y);
-	uint2 idxTop	 = uint2(id.x, id.y - 1);
-	uint2 idxBottom  = uint2(id.x, id.y + 1);
-	float diag = 4.0;
-	float L = 0;
-	float R = 0;
-	float T = 0;
-	float B = 0;
-	float center = gCurrentTex[id.xy];
-	float f = gRightPoissonTex[id.xy];
+	int i = id.x;
+	int j = id.y;
+	if (gCurentLevelGridMarker[id.xy] == CELL_LIQUID)
+	{
+		uint2 idxLeft = uint2(max(i - 1, 0), j);
+		uint2 idxRight = uint2(min(i + 1, _currentXSize - 1), j);
+		uint2 idxTop = uint2(i, max(0, j - 1));
+		uint2 idxBottom = uint2(i, min(j + 1, _currentYSize - 1));
+		float diag = 4.0;
+		float L = 0;
+		float R = 0;
+		float T = 0;
+		float B = 0;
+		float center = gCurrentTex[id.xy];
+		float f = gRightPoissonTex[id.xy];
 
-	if (gCurentLevelGridMarker[idxLeft] == CELL_SOLID) { diag -= 1.0; }
-	if (gCurentLevelGridMarker[idxRight] == CELL_SOLID) { diag -= 1.0; }
-	if (gCurentLevelGridMarker[idxTop] == CELL_SOLID) { diag -= 1.0; }
-	if (gCurentLevelGridMarker[idxBottom] == CELL_SOLID) { diag -= 1.0; }
+		if (gCurentLevelGridMarker[idxLeft] == CELL_SOLID) { diag -= 1.0; }
+		if (gCurentLevelGridMarker[idxRight] == CELL_SOLID) { diag -= 1.0; }
+		if (gCurentLevelGridMarker[idxTop] == CELL_SOLID) { diag -= 1.0; }
+		if (gCurentLevelGridMarker[idxBottom] == CELL_SOLID) { diag -= 1.0; }
 
-	if (gCurentLevelGridMarker[idxLeft] == CELL_LIQUID) { L = gCurrentTex[idxLeft]; }
-	if (gCurentLevelGridMarker[idxRight] == CELL_LIQUID) { R = gCurrentTex[idxRight]; }
-	if (gCurentLevelGridMarker[idxTop] == CELL_LIQUID) { T = gCurrentTex[idxTop]; }
-	if (gCurentLevelGridMarker[idxBottom] == CELL_LIQUID) { B = gCurrentTex[idxBottom]; }
+		/*if (gCurentLevelGridMarker[idxLeft] == CELL_AIR) { diag -= gCurrentLevelLevelSet[idxLeft] / min(1.0e-6, gCurrentLevelLevelSet[id.xy]); }
+		if (gCurentLevelGridMarker[idxRight] == CELL_AIR) { diag -= gCurrentLevelLevelSet[idxRight] / min(1.0e-6, gCurrentLevelLevelSet[id.xy]); }
+		if (gCurentLevelGridMarker[idxTop] == CELL_AIR) { diag -= gCurrentLevelLevelSet[idxTop] / min(1.0e-6, gCurrentLevelLevelSet[id.xy]); }
+		if (gCurentLevelGridMarker[idxBottom] == CELL_AIR) { diag -= gCurrentLevelLevelSet[idxBottom] / min(1.0e-6, gCurrentLevelLevelSet[id.xy]); }
+*/
+		if (gCurentLevelGridMarker[idxLeft] == CELL_LIQUID) { L = gCurrentTex[idxLeft]; }
+		if (gCurentLevelGridMarker[idxRight] == CELL_LIQUID) { R = gCurrentTex[idxRight]; }
+		if (gCurentLevelGridMarker[idxTop] == CELL_LIQUID) { T = gCurrentTex[idxTop]; }
+		if (gCurentLevelGridMarker[idxBottom] == CELL_LIQUID) { B = gCurrentTex[idxBottom]; }
 
-	gResidualTex[id.xy] = f - (4.0 * center - L - R - T - B);
+		gResidualTex[id.xy] = f - (diag * center - L - R - T - B);
+
+	}
+	else {
+		gResidualTex[id.xy] = 0;
+	}
+
+	
 }

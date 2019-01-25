@@ -16,5 +16,5 @@ void MGCorrect(uint3 id : SV_DispatchThreadID)
 {
 	if (id.x >= _currentXSize || id.y >= _currentYSize)
 		return;
-	gNeedCorrectTex[id.xy] += gErrorTex[id.xy];
+	gNeedCorrectTex[id.xy] -= gErrorTex[id.xy];
 }

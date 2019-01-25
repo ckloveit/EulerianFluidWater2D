@@ -182,7 +182,7 @@ public class FluidSolver2D : MonoBehaviour
 
         if (mPressureSolverType == FluidPressureSolverType.MultiGrid)
         {
-            int maxLevel = 4;
+            int maxLevel = 3;
             mMultiGridSolver = MultiGridLinearSolver2D.Build(maxLevel, mWidth, mHeight, mPressure,
                 mPressureWrite, mGridMarker, mDivergence, mLevelSet[READ]);
             mMultiGridSolver.mComputePressure = mComputePressure;
@@ -219,7 +219,7 @@ public class FluidSolver2D : MonoBehaviour
     private void SimulateStep()
     {
         // for emitter
-        if(mEmitterCounter++ % 500 == 0)
+        if(mEmitterCounter++ % 400 == 0 && mEmitterCounter > 1)
         {
             mCounter++;
             if (mCounter <= 3)
@@ -568,7 +568,9 @@ public class FluidSolver2D : MonoBehaviour
     {
         UploadGlobalParameters(mComputePressure);
 
+        mMultiGridSolver.UpdateLevel0Tex(mLevelSet[READ]);
         // 1.start Multigrid solver
+        //mMultiGridSolver.DebugComputePressure();
         mMultiGridSolver.MultigridSolveVCycle();
 
         // 2. projection (subtract divergence of pressure)
@@ -679,5 +681,12 @@ public class FluidSolver2D : MonoBehaviour
         {
             mMultiGridSolver.Release();
         }
+    }
+
+
+    // debug
+    private void OnGUI()
+    {
+        GUILayout.Label("Emitter Counter = " + mEmitterCounter.ToString());
     }
 }
