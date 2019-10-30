@@ -3,7 +3,7 @@
 模拟的类型是水，压强方程的求解使用了MuitiGrid进行加速求解。  
 
 #参考资料：   
-代码：
+代码：  
 https://github.com/topics/fluid-simulation  
 https://github.com/kbladin/Fluid_Simulation  
 https://github.com/rlguy/GridFluidSim3D  
