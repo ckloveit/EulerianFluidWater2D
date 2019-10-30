@@ -15,3 +15,6 @@ https://fluidenginedevelopment.org/
 https://cs.uwaterloo.ca/~c2batty/（有非常多的关于物理模拟的资料）  
 http://matthias-mueller-fischer.ch/  
 https://math.berkeley.edu/~sethian/2006/Semiconductors/ieee_level_set_explain.html  
+#结果
+![image](https://github.com/ckloveit/EulerianFluidWater2D/blob/master/2DWater.gif)
+
